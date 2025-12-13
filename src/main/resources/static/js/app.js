@@ -67,197 +67,47 @@ function setupNavigation() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
 
+            // 1. Update active nav state
             navItems.forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
 
-            const text = item.textContent.trim();
-            let targetId = 'dashboard-section';
+            // 2. Identify target section
+            const targetId = item.dataset.target;
+            console.log('Navigating to:', targetId);
 
-            if (text.includes('Dashboard')) targetId = 'dashboard-section';
-            else if (text.includes('Products')) targetId = 'products-section';
-            else if (text.includes('Analytics')) {
-                targetId = 'analytics-section';
-                renderAnalytics(products); // Refresh charts when entering
-            }
-            else if (text.includes('Settings')) targetId = 'settings-section';
+            if (!targetId) return;
 
+            // 3. Hide all sections
             sections.forEach(section => {
                 section.style.display = 'none';
                 section.classList.remove('active');
             });
 
+            // 4. Show target section
             const targetSection = document.getElementById(targetId);
             if (targetSection) {
                 targetSection.style.display = 'block';
                 targetSection.classList.add('active');
+            } else {
+                console.error('Target section not found:', targetId);
+            }
+
+            // 5. Special handlers
+            if (targetId === 'analytics-section') {
+                renderAnalytics(products);
             }
         });
     });
 }
 
-function setupViewToggles() {
-    const toggles = document.querySelectorAll('[data-view]');
-    toggles.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const view = btn.dataset.view; // 'list' or 'grid'
-            currentView = view;
-
-            // Update UI buttons
-            toggles.forEach(b => {
-                if (b.dataset.view === view) b.classList.add('active');
-                else b.classList.remove('active');
-            });
-
-            // Update Visibility
-            toggleViewContainers();
-        });
-    });
-}
-
-function toggleViewContainers() {
-    const listContainers = document.querySelectorAll('.table-container');
-    const gridContainers = document.querySelectorAll('.inventory-grid');
-
-    if (currentView === 'list') {
-        listContainers.forEach(el => el.style.display = 'block');
-        gridContainers.forEach(el => el.style.display = 'none');
-    } else {
-        listContainers.forEach(el => el.style.display = 'none');
-        gridContainers.forEach(el => el.style.display = 'grid');
-    }
-}
-
-function setupSearch() {
-    const handleSearch = (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = products.filter(p =>
-            p.name.toLowerCase().includes(term) ||
-            p.sku.toLowerCase().includes(term) ||
-            p.category.toLowerCase().includes(term)
-        );
-        renderAllViews(filtered);
-    };
-
-    const dSearch = document.getElementById('searchInput');
-    const pSearch = document.getElementById('productSearchInput');
-
-    if (dSearch) dSearch.addEventListener('input', handleSearch);
-    if (pSearch) pSearch.addEventListener('input', handleSearch);
-}
-
-async function fetchProducts() {
-    try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-
-        if (data.status === 'success') {
-            products = data.data;
-            renderAllViews(products);
-            renderStats(products);
-            renderAnalytics(products);
-        }
-    } catch (error) {
-        console.error('Error fetching products:', error);
-    }
-}
-
-function formatPrice(amount) {
-    const rate = currencyRates[currentCurrency];
-    const val = amount * rate;
-    return `${currencySymbols[currentCurrency]}${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function renderAllViews(data) {
-    renderTable(data, 'productTableBody');
-    renderTable(data, 'allProductsTableBody');
-    renderGrid(data, 'dashboard-grid-view');
-    renderGrid(data, 'products-grid-view');
-    toggleViewContainers(); // Ensure correct view is shown
-}
-
-function renderTable(data, elementId) {
-    const tbody = document.getElementById(elementId);
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    data.forEach(p => {
-        const stockStatus = getStockStatus(p.quantity);
-        const row = `
-            <tr>
-                <td>
-                    <div style="font-weight: 600;">${p.name}</div>
-                    <div style="font-size: 0.8em; color: var(--text-muted);">${p.description ? p.description.substring(0, 30) + '...' : ''}</div>
-                </td>
-                <td style="font-family: monospace; color: var(--accent);">${p.sku}</td>
-                <td><span style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">${p.category || 'Uncategorized'}</span></td>
-                <td>${formatPrice(p.price)}</td>
-                <td>${p.quantity}</td>
-                <td><span class="status-badge ${stockStatus.class}">${stockStatus.label}</span></td>
-                <td>
-                    <button class="action-btn" onclick="openEditModal(${p.id})"><i class="fa-solid fa-pen"></i></button>
-                    <button class="action-btn delete-btn" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
-}
-
-function renderGrid(data, elementId) {
-    const container = document.getElementById(elementId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    data.forEach(p => {
-        const stockStatus = getStockStatus(p.quantity);
-        const card = `
-            <div class="product-card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">${p.name}</div>
-                        <div class="card-subtitle">${p.sku}</div>
-                    </div>
-                    <span class="status-badge ${stockStatus.class}">${stockStatus.label}</span>
-                </div>
-                <div class="card-description">${p.description ? p.description.substring(0, 50) + '...' : 'No description'}</div>
-                
-                <div class="card-stats">
-                    <div class="card-stat-item">
-                        <label>Price</label>
-                        <span>${formatPrice(p.price)}</span>
-                    </div>
-                    <div class="card-stat-item">
-                        <label>Stock</label>
-                        <span>${p.quantity}</span>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    <span class="card-category">${p.category || 'General'}</span>
-                    <div class="card-actions">
-                        <button class="action-btn" onclick="openEditModal(${p.id})"><i class="fa-solid fa-pen"></i></button>
-                        <button class="action-btn delete-btn" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-            </div>
-        `;
-        container.innerHTML += card;
-    });
-}
-
-function renderStats(data) {
-    document.getElementById('totalProducts').innerText = data.length;
-
-    const totalVal = data.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
-    document.getElementById('totalValue').innerText = formatPrice(totalVal);
-
-    const lowStock = data.filter(p => p.quantity < 10).length;
-    document.getElementById('lowStock').innerText = lowStock;
-}
+// ... existing code ...
 
 function renderAnalytics(data) {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js is not loaded.');
+        return;
+    }
+
     // 1. Category Distribution
     const categories = {};
     data.forEach(p => {
