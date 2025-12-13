@@ -1,0 +1,39 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1398.v23ca_6a_c0cea_6">
+    <description>DevOps Pipeline for Inventory Management System</description>
+    <keepDependencies>false</keepDependencies>
+    
+    <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.97">
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@5.0.0">
+            <configVersion>2</configVersion>
+            <userRemoteConfigs>
+                <hudson.plugins.git.UserRemoteConfig>
+                    <url>https://github.com/your-username/ecommerce-inventory-system.git</url>
+                    <credentialsId>github-credentials</credentialsId>
+                </hudson.plugins.git.UserRemoteConfig>
+            </userRemoteConfigs>
+            <branches>
+                <hudson.plugins.git.BranchSpec>
+                    <name>*/main</name>
+                </hudson.plugins.git.BranchSpec>
+            </branches>
+            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+            <submoduleCfg class="java.util.Collections$EmptyList"/>
+            <extensions>
+                <hudson.plugins.git.extensions.impl.CloneOption>
+                    <shallow>false</shallow>
+                    <noTags>false</noTags>
+                    <reference/>
+                    <timeout>10</timeout>
+                </hudson.plugins.git.extensions.impl.CloneOption>
+            </extensions>
+        </scm>
+        <scriptPath>Jenkinsfile</scriptPath>
+    </definition>
+    
+    <triggers>
+        <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.38.0">
+            <spec/>
+        </com.cloudbees.jenkins.GitHubPushTrigger>
+    </triggers>
+</flow-definition>
