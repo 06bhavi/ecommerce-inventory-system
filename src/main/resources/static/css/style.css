@@ -63,8 +63,13 @@ body {
 }
 
 @keyframes float {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(50px, 50px); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(50px, 50px);
+    }
 }
 
 /* App Layout */
@@ -120,7 +125,8 @@ body {
     gap: 0.8rem;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover,
+.nav-item.active {
     background: rgba(99, 102, 241, 0.1);
     color: var(--primary);
     border: 1px solid rgba(99, 102, 241, 0.2);
@@ -146,8 +152,15 @@ body {
     font-size: 0.9rem;
 }
 
-.info .name { font-weight: 600; font-size: 0.95rem; }
-.info .role { color: var(--text-muted); font-size: 0.8rem; }
+.info .name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.info .role {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
 
 /* Main Content */
 .main-content {
@@ -234,12 +247,32 @@ body {
     font-size: 1.5rem;
 }
 
-.color-1 { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
-.color-2 { background: rgba(20, 184, 166, 0.2); color: var(--accent); }
-.color-3 { background: rgba(236, 72, 153, 0.2); color: var(--secondary); }
+.color-1 {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary);
+}
 
-.stat-info h3 { color: var(--text-muted); font-size: 0.9rem; font-weight: 400; }
-.stat-info p { font-size: 1.8rem; font-weight: 700; margin-top: 0.2rem; }
+.color-2 {
+    background: rgba(20, 184, 166, 0.2);
+    color: var(--accent);
+}
+
+.color-3 {
+    background: rgba(236, 72, 153, 0.2);
+    color: var(--secondary);
+}
+
+.stat-info h3 {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.stat-info p {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 0.2rem;
+}
 
 /* Table */
 .content-section {
@@ -282,9 +315,20 @@ body {
     font-weight: 600;
 }
 
-.status-instock { background: rgba(20, 184, 166, 0.2); color: var(--accent); }
-.status-lowstock { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-.status-outstock { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.status-instock {
+    background: rgba(20, 184, 166, 0.2);
+    color: var(--accent);
+}
+
+.status-lowstock {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.status-outstock {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
 
 .action-btn {
     background: transparent;
@@ -295,8 +339,13 @@ body {
     transition: color 0.2s;
 }
 
-.action-btn:hover { color: var(--text-main); }
-.delete-btn:hover { color: #ef4444; }
+.action-btn:hover {
+    color: var(--text-main);
+}
+
+.delete-btn:hover {
+    color: #ef4444;
+}
 
 /* Modal */
 .modal-overlay {
@@ -356,7 +405,9 @@ body {
     gap: 1rem;
 }
 
-.full-width { grid-column: span 2; }
+.full-width {
+    grid-column: span 2;
+}
 
 .form-group {
     display: flex;
@@ -369,7 +420,8 @@ body {
     color: var(--text-muted);
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
     background: rgba(15, 23, 42, 0.5);
     border: 1px solid var(--glass-border);
     padding: 0.8rem;
@@ -393,6 +445,141 @@ body {
 .btn-ghost {
     background: transparent;
     border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-}
+
+    /* Analytics Styles */
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .chart-container {
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .mock-chart-bar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        height: 200px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--glass-border);
+    }
+
+    .bar {
+        width: 40px;
+        border-radius: 5px 5px 0 0;
+        opacity: 0.8;
+        transition: height 1s ease-out;
+    }
+
+    .mock-chart-line {
+        height: 200px;
+        padding: 10px;
+        border-left: 2px solid var(--glass-border);
+        border-bottom: 2px solid var(--glass-border);
+    }
+
+    .line-chart-svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+
+    .chart-label {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+
+    /* Settings Styles */
+    .settings-container {
+        max-width: 800px;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-info h4 {
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+    }
+
+    .setting-info p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Toggle Switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: var(--primary);
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(24px);
+    }
+
+    .glass-select {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--glass-border);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        outline: none;
+        font-family: inherit;
+        cursor: pointer;
+    }
+
+    .glass-select option {
+        background: #1e293b;
+    }

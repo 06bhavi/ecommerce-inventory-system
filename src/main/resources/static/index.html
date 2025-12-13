@@ -40,120 +40,139 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="top-bar">
-                <div class="search-bar">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search inventory...">
-                </div>
-                <button class="btn-primary" onclick="openModal()">
-                    <i class="fa-solid fa-plus"></i> Add Product
-                </button>
-            </header>
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="page-section active">
+                <header class="top-bar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search inventory...">
+                    </div>
+                    <button class="btn-primary" onclick="openModal()">
+                        <i class="fa-solid fa-plus"></i> Add Product
+                    </button>
+                </header>
 
-            <div class="stats-grid">
-                <div class="stat-card glass-panel">
-                    <div class="stat-icon color-1"><i class="fa-solid fa-boxes-stacked"></i></div>
-                    <div class="stat-info">
-                        <h3>Total Items</h3>
-                        <p id="totalProducts">0</p>
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon color-1"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Items</h3>
+                            <p id="totalProducts">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon color-2"><i class="fa-solid fa-dollar-sign"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Value</h3>
+                            <p id="totalValue">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon color-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h3>Low Stock</h3>
+                            <p id="lowStock">0</p>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card glass-panel">
-                    <div class="stat-icon color-2"><i class="fa-solid fa-dollar-sign"></i></div>
-                    <div class="stat-info">
-                        <h3>Total Value</h3>
-                        <p id="totalValue">$0.00</p>
-                    </div>
-                </div>
-                <div class="stat-card glass-panel">
-                    <div class="stat-icon color-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    <div class="stat-info">
-                        <h3>Low Stock</h3>
-                        <p id="lowStock">0</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="content-section">
-                <div class="section-header">
-                    <h2>Inventory Items</h2>
-                    <div class="view-options">
-                        <button class="icon-btn active"><i class="fa-solid fa-list"></i></button>
-                        <button class="icon-btn"><i class="fa-solid fa-border-all"></i></button>
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Inventory Items</h2>
+                        <div class="view-options">
+                            <button class="icon-btn active"><i class="fa-solid fa-list"></i></button>
+                            <button class="icon-btn"><i class="fa-solid fa-border-all"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container glass-panel">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody">
+                                <!-- Items will be injected here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <div class="table-container glass-panel">
-                    <table class="inventory-table">
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>SKU</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody">
-                            <!-- Items will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </section>
 
-            <!-- ANALYTICS SECTION (Hidden by default) -->
-            <div id="analyticsSection" class="content-section" style="display: none;">
-                <h2>Analytics Overview</h2>
-                <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-top: 1rem;">
-                    <div class="stat-card glass-panel" style="flex-direction: column; align-items: flex-start;">
-                        <h3>Category Distribution</h3>
-                        <div id="categoryChart" style="width: 100%; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                            <!-- Bars injected by JS -->
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <h2>Analytics Dashboard</h2>
+                </header>
+                <div class="analytics-grid">
+                    <div class="glass-panel chart-container">
+                        <h3>Inventory Distribution</h3>
+                        <div class="mock-chart-bar">
+                            <div class="bar" style="height: 60%; background: var(--primary);"></div>
+                            <div class="bar" style="height: 80%; background: var(--secondary);"></div>
+                            <div class="bar" style="height: 40%; background: var(--accent);"></div>
+                            <div class="bar" style="height: 90%; background: #fbbf24;"></div>
                         </div>
+                        <p class="chart-label">Categories Performance</p>
                     </div>
-                    <div class="stat-card glass-panel" style="flex-direction: column; align-items: flex-start;">
-                        <h3>Stock Value by Category</h3>
-                        <div id="valueChart" style="width: 100%; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                             <!-- Bars injected by JS -->
+                    <div class="glass-panel chart-container">
+                        <h3>Stock Trends</h3>
+                        <div class="mock-chart-line">
+                            <svg viewBox="0 0 100 50" class="line-chart-svg">
+                                <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="0,40 20,35 40,20 60,25 80,10 100,5" />
+                            </svg>
                         </div>
+                        <p class="chart-label">Last 6 Months</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- SETTINGS SECTION (Hidden by default) -->
-            <div id="settingsSection" class="content-section" style="display: none;">
-                <h2>System Settings</h2>
-                <div class="glass-panel" style="max-width: 600px;">
-                    <form onsubmit="event.preventDefault(); alert('Settings saved!');">
-                        <div class="form-group" style="margin-bottom: 1rem;">
-                            <label>Application Name</label>
-                            <input type="text" value="NexusInv" readonly>
+            <!-- Settings Section -->
+            <section id="settings-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <h2>System Settings</h2>
+                </header>
+                <div class="settings-container glass-panel">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Dark Mode</h4>
+                            <p>Enable immersive dark theme</p>
                         </div>
-                        <div class="form-group" style="margin-bottom: 1rem;">
-                            <label>Currency Symbol</label>
-                            <select style="background: rgba(15, 23, 42, 0.5); border: 1px solid var(--glass-border); padding: 0.8rem; border-radius: 8px; color: white; width: 100%;">
-                                <option value="USD">$ (USD)</option>
-                                <option value="EUR">€ (EUR)</option>
-                                <option value="INR">₹ (INR)</option>
-                            </select>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Notifications</h4>
+                            <p>Email alerts for low stock</p>
                         </div>
-                        <div class="form-group" style="margin-bottom: 1rem;">
-                             <label>Theme</label>
-                             <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                     <input type="radio" name="theme" checked> Dark Nebula
-                                 </label>
-                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                     <input type="radio" name="theme"> Light Stardust
-                                 </label>
-                             </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Currency</h4>
+                            <p>Default currency for valuation</p>
                         </div>
-                        <button class="btn-primary">Save Changes</button>
-                    </form>
+                        <select class="glass-select">
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                            <option>INR (₹)</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 
@@ -165,31 +184,31 @@
                 <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="productForm">
-                <input type="hidden" id="productId" name="id">
+                <input type="hidden" name="id" id="productId">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Product Name</label>
-                        <input type="text" name="name" required placeholder="e.g. Neural Link V2">
+                        <input type="text" name="name" id="productName" required placeholder="e.g. Neural Link V2">
                     </div>
                     <div class="form-group">
                         <label>SKU</label>
-                        <input type="text" name="sku" required placeholder="Generate SKU...">
+                        <input type="text" name="sku" id="productSku" required placeholder="Generate SKU...">
                     </div>
                     <div class="form-group full-width">
                         <label>Description</label>
-                        <textarea name="description" required placeholder="Product details..."></textarea>
+                        <textarea name="description" id="productDescription" required placeholder="Product details..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Price ($)</label>
-                        <input type="number" name="price" step="0.01" required>
+                        <input type="number" name="price" id="productPrice" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label>Quantity</label>
-                        <input type="number" name="quantity" required>
+                        <input type="number" name="quantity" id="productQuantity" required>
                     </div>
                     <div class="form-group">
                         <label>Category</label>
-                        <input type="text" name="category" list="categories" placeholder="Select or type...">
+                        <input type="text" name="category" id="productCategory" list="categories" placeholder="Select or type...">
                         <datalist id="categories">
                             <option value="Electronics">
                             <option value="Accessories">
