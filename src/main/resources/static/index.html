@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory OS | Future of Retail</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/grid.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -80,12 +81,12 @@
                     <div class="section-header">
                         <h2>Inventory Items</h2>
                         <div class="view-options">
-                            <button class="icon-btn active"><i class="fa-solid fa-list"></i></button>
-                            <button class="icon-btn"><i class="fa-solid fa-border-all"></i></button>
+                            <button class="icon-btn active" data-view="list"><i class="fa-solid fa-list"></i></button>
+                            <button class="icon-btn" data-view="grid"><i class="fa-solid fa-border-all"></i></button>
                         </div>
                     </div>
                     
-                    <div class="table-container glass-panel">
+                    <div id="dashboard-list-view" class="table-container glass-panel">
                         <table class="inventory-table">
                             <thead>
                                 <tr>
@@ -103,8 +104,55 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="dashboard-grid-view" class="inventory-grid" style="display: none;">
+                        <!-- Grid items injected here -->
+                    </div>
                 </div>
             </section>
+
+            <!-- Products Section -->
+            <section id="products-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="productSearchInput" placeholder="Search products...">
+                    </div>
+                    <button class="btn-primary" onclick="openModal()">
+                        <i class="fa-solid fa-plus"></i> Add Product
+                    </button>
+                </header>
+
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>All Products</h2>
+                        <div class="view-options">
+                            <button class="icon-btn active" data-view="list"><i class="fa-solid fa-list"></i></button>
+                            <button class="icon-btn" data-view="grid"><i class="fa-solid fa-border-all"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div id="products-list-view" class="table-container glass-panel">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allProductsTableBody">
+                                <!-- Items will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="products-grid-view" class="inventory-grid" style="display: none;">
+                        <!-- Grid items injected here -->
+                    </div>
+                </div>
 
             <!-- Analytics Section -->
             <section id="analytics-section" class="page-section" style="display: none;">
@@ -114,22 +162,11 @@
                 <div class="analytics-grid">
                     <div class="glass-panel chart-container">
                         <h3>Inventory Distribution</h3>
-                        <div class="mock-chart-bar">
-                            <div class="bar" style="height: 60%; background: var(--primary);"></div>
-                            <div class="bar" style="height: 80%; background: var(--secondary);"></div>
-                            <div class="bar" style="height: 40%; background: var(--accent);"></div>
-                            <div class="bar" style="height: 90%; background: #fbbf24;"></div>
-                        </div>
-                        <p class="chart-label">Categories Performance</p>
+                        <canvas id="categoryChart"></canvas>
                     </div>
                     <div class="glass-panel chart-container">
                         <h3>Stock Trends</h3>
-                        <div class="mock-chart-line">
-                            <svg viewBox="0 0 100 50" class="line-chart-svg">
-                                <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="0,40 20,35 40,20 60,25 80,10 100,5" />
-                            </svg>
-                        </div>
-                        <p class="chart-label">Last 6 Months</p>
+                        <canvas id="trendChart"></canvas>
                     </div>
                 </div>
             </section>
@@ -224,6 +261,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
