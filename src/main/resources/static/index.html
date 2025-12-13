@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory OS | Future of Retail</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebarガラス">
+            <div class="brand">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <h2>Nexus<span class="highlight">Inv</span></h2>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-box-open"></i> Products</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar">AD</div>
+                <div class="info">
+                    <p class="name">Admin User</p>
+                    <p class="role">Manager</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search inventory...">
+                </div>
+                <button class="btn-primary" onclick="openModal()">
+                    <i class="fa-solid fa-plus"></i> Add Product
+                </button>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon color-1"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Items</h3>
+                        <p id="totalProducts">0</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon color-2"><i class="fa-solid fa-dollar-sign"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Value</h3>
+                        <p id="totalValue">$0.00</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon color-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="stat-info">
+                        <h3>Low Stock</h3>
+                        <p id="lowStock">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Inventory Items</h2>
+                    <div class="view-options">
+                        <button class="icon-btn active"><i class="fa-solid fa-list"></i></button>
+                        <button class="icon-btn"><i class="fa-solid fa-border-all"></i></button>
+                    </div>
+                </div>
+                
+                <div class="table-container glass-panel">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                            <!-- Items will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Add New Product</h3>
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="productForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" name="name" required placeholder="e.g. Neural Link V2">
+                    </div>
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input type="text" name="sku" required placeholder="Generate SKU...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea name="description" required placeholder="Product details..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" name="price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" name="category" list="categories" placeholder="Select or type...">
+                        <datalist id="categories">
+                            <option value="Electronics">
+                            <option value="Accessories">
+                            <option value="Components">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Create Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
