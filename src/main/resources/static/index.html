@@ -102,6 +102,58 @@
                     </table>
                 </div>
             </div>
+
+            <!-- ANALYTICS SECTION (Hidden by default) -->
+            <div id="analyticsSection" class="content-section" style="display: none;">
+                <h2>Analytics Overview</h2>
+                <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-top: 1rem;">
+                    <div class="stat-card glass-panel" style="flex-direction: column; align-items: flex-start;">
+                        <h3>Category Distribution</h3>
+                        <div id="categoryChart" style="width: 100%; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Bars injected by JS -->
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel" style="flex-direction: column; align-items: flex-start;">
+                        <h3>Stock Value by Category</h3>
+                        <div id="valueChart" style="width: 100%; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                             <!-- Bars injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS SECTION (Hidden by default) -->
+            <div id="settingsSection" class="content-section" style="display: none;">
+                <h2>System Settings</h2>
+                <div class="glass-panel" style="max-width: 600px;">
+                    <form onsubmit="event.preventDefault(); alert('Settings saved!');">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Application Name</label>
+                            <input type="text" value="NexusInv" readonly>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Currency Symbol</label>
+                            <select style="background: rgba(15, 23, 42, 0.5); border: 1px solid var(--glass-border); padding: 0.8rem; border-radius: 8px; color: white; width: 100%;">
+                                <option value="USD">$ (USD)</option>
+                                <option value="EUR">€ (EUR)</option>
+                                <option value="INR">₹ (INR)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                             <label>Theme</label>
+                             <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                     <input type="radio" name="theme" checked> Dark Nebula
+                                 </label>
+                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                     <input type="radio" name="theme"> Light Stardust
+                                 </label>
+                             </div>
+                        </div>
+                        <button class="btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -109,10 +161,11 @@
     <div id="productModal" class="modal-overlay">
         <div class="modal-glass">
             <div class="modal-header">
-                <h3>Add New Product</h3>
+                <h3 id="modalTitle">Add New Product</h3>
                 <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="productForm">
+                <input type="hidden" id="productId" name="id">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Product Name</label>
