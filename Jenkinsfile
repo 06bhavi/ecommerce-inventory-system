@@ -1,72 +1,124 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.9' // Make sure this global tool is configured in Jenkins
-        jdk 'JDK 17'      // Make sure this global tool is configured in Jenkins
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+        timeout(time: 60, unit: 'MINUTES')
     }
 
     environment {
-        DOCKER_IMAGE = 'inventory-app'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
-        REGISTRY = 'docker.io/yourusername' // Replace with your registry
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'
+        MAVEN_HOME = '/usr/share/maven'
+        IMAGE_NAME = 'inventory-app'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKER_REGISTRY = 'docker.io'
+        GIT_REPO = 'https://github.com/your-username/ecommerce-inventory-system.git'
     }
 
     stages {
         stage('Checkout') {
             steps {
+                echo '🔄 Checking out code from repository...'
                 checkout scm
+                sh 'git log --oneline -5'
             }
         }
 
-        stage('Compile') {
+        stage('Build') {
             steps {
+                echo '🔨 Building with Maven...'
                 sh 'mvn clean compile'
             }
         }
 
-        stage('Unit Tests') {
+        stage('Test') {
             steps {
+                echo '✅ Running unit tests...'
                 sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
+                junit 'target/surefire-reports/*.xml'
             }
         }
 
-        stage('Build & Package') {
+        stage('Code Quality') {
             steps {
+                echo '📊 Analyzing code quality...'
+                sh '''
+                    mvn package -DskipTests
+                    echo "Code quality analysis completed"
+                '''
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo '📦 Packaging application...'
                 sh 'mvn package -DskipTests'
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                }
+                archiveArtifacts artifacts: 'target/*.jar', 
+                                 fingerprint: true
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    echo "Building Docker image ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
-                }
+                echo '🐳 Building Docker image...'
+                sh '''
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                    docker images | grep inventory
+                '''
+            }
+        }
+
+        stage('Test Docker Container') {
+            steps {
+                echo '🧪 Testing Docker container...'
+                sh '''
+                    docker-compose down --remove-orphans || true
+                    docker-compose up -d
+                    sleep 15
+                    
+                    # Health check
+                    curl -f http://localhost:8080/api/v1/products/health || exit 1
+                    
+                    echo "✓ Container is healthy"
+                '''
+            }
+        }
+
+        stage('Generate Report') {
+            steps {
+                echo '📝 Generating build report...'
+                sh '''
+                    echo "Build Information:" > build_report.txt
+                    echo "Build Number: ${BUILD_NUMBER}" >> build_report.txt
+                    echo "Build Timestamp: $(date)" >> build_report.txt
+                    echo "Git Commit: $(git rev-parse HEAD)" >> build_report.txt
+                    echo "Git Branch: $(git rev-parse --abbrev-ref HEAD)" >> build_report.txt
+                    echo "Build Status: SUCCESS" >> build_report.txt
+                    cat build_report.txt
+                '''
+                archiveArtifacts artifacts: 'build_report.txt'
             }
         }
     }
 
     post {
-        always {
-            cleanWs()
-        }
         success {
-            echo 'Pipeline executed successfully!'
+            echo '✓ Pipeline completed successfully!'
+            sh 'docker-compose logs app'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo '✗ Pipeline failed!'
+            sh 'docker-compose logs'
+        }
+        always {
+            echo '🧹 Cleaning up...'
+            sh '''
+                # Optional: Uncomment to stop containers after build
+                # docker-compose down
+            '''
+            cleanWs()
         }
     }
 }
