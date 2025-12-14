@@ -35,18 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeSettings() {
     const currencySelect = document.querySelector('#settings-section select');
     if (currencySelect) {
-        currencySelect.value = Object.keys(currencySymbols).find(key => currencySymbols[key].includes(currencySelect.checkVisibility) ? key : null) || currentCurrency + ` (${currencySymbols[currentCurrency]})`;
-        // match the format "USD ($)"
-        // easier: just set by text index or value if values were standard. 
-        // Let's loop options to set selected based on currentCurrency
+        // Set initial value based on currentCurrency
         Array.from(currencySelect.options).forEach(opt => {
-            if (opt.text.includes(currentCurrency)) {
-                currencySelect.value = opt.text;
+            if (opt.value.includes(currentCurrency) || opt.text.includes(currentCurrency)) {
+                currencySelect.value = opt.value || opt.text;
             }
         });
 
         currencySelect.addEventListener('change', (e) => {
-            const val = e.target.value; // "USD ($)"
+            const val = e.target.value;
             if (val.includes('USD')) currentCurrency = 'USD';
             else if (val.includes('EUR')) currentCurrency = 'EUR';
             else if (val.includes('INR')) currentCurrency = 'INR';
@@ -54,7 +51,10 @@ function initializeSettings() {
             localStorage.setItem('inventory_currency', currentCurrency);
             // Re-render everything
             renderAllViews(products);
-            renderStats(products);
+            // Check if renderStats exists before calling
+            if (typeof renderStats === 'function') {
+                renderStats(products);
+            }
         });
     }
 }
@@ -240,8 +240,10 @@ function closeModal() {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
+    console.log('Form submission started');
     const formData = new FormData(e.target);
     const product = Object.fromEntries(formData.entries());
+    console.log('Product data to submit:', product);
 
     try {
         let url = API_URL;

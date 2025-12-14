@@ -377,18 +377,27 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
-    display: flex;
+    display: none;
+    /* Changed from flex + opacity 0 to prevent blocking */
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
+    z-index: 9999;
 }
 
 .modal-overlay.active {
-    opacity: 1;
+    display: flex;
+    animation: fadeInModal 0.3s forwards;
     pointer-events: auto;
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-glass {
@@ -400,6 +409,7 @@ body {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     transform: scale(0.9);
     transition: transform 0.3s;
+    pointer-events: auto;
 }
 
 .modal-overlay.active .modal-glass {
@@ -450,10 +460,14 @@ body {
     color: white;
     outline: none;
     font-family: inherit;
+    position: relative;
+    z-index: 10;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group textarea:focus {
     border-color: var(--primary);
+    outline: 2px solid var(--primary-glow);
 }
 
 .modal-footer {
