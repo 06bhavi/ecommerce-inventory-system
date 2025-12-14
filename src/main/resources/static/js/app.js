@@ -100,7 +100,168 @@ function setupNavigation() {
     });
 }
 
-// ... existing code ...
+// Core Functions
+async function fetchProducts() {
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        products = data.data || [];
+        renderAllViews(products);
+        renderStats(products);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+    }
+}
+
+function renderAllViews(data) {
+    // Filter out deleted items if necessary, but backend should handle that.
+    renderListView('dashboard-list-view', data.slice(0, 5));
+    renderListView('products-list-view', data);
+
+    renderGridView('dashboard-grid-view', data.slice(0, 5));
+    renderGridView('products-grid-view', data);
+}
+
+function renderStats(data) {
+    const totalProducts = document.getElementById('totalProducts');
+    const totalValue = document.getElementById('totalValue');
+    const lowStock = document.getElementById('lowStock');
+
+    if (totalProducts) totalProducts.innerText = data.length;
+
+    if (totalValue) {
+        const total = data.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+        // Convert based on currency
+        const rate = currencyRates[currentCurrency] || 1;
+        const symbol = currencySymbols[currentCurrency] || '$';
+        totalValue.innerText = `${symbol}${(total * rate).toFixed(2)}`;
+    }
+
+    if (lowStock) {
+        const low = data.filter(p => p.quantity < 10).length;
+        lowStock.innerText = low;
+    }
+}
+
+function renderListView(elementId, data) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+
+    const tbody = container.querySelector('tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No products found</td></tr>';
+        return;
+    }
+
+    data.forEach(product => {
+        const status = getStockStatus(product.quantity);
+        const rate = currencyRates[currentCurrency] || 1;
+        const symbol = currencySymbols[currentCurrency] || '$';
+        const price = (product.price * rate).toFixed(2);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <div style="font-weight: 500;">${product.name}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">${product.description || ''}</div>
+            </td>
+            <td>${product.sku}</td>
+            <td><span class="status-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">${product.category}</span></td>
+            <td>${symbol}${price}</td>
+            <td>${product.quantity}</td>
+            <td><span class="status-badge ${status.class}">${status.label}</span></td>
+            <td>
+                <button class="action-btn" onclick="openEditModal(${product.id})"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function renderGridView(elementId, data) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    data.forEach(product => {
+        const status = getStockStatus(product.quantity);
+        const rate = currencyRates[currentCurrency] || 1;
+        const symbol = currencySymbols[currentCurrency] || '$';
+        const price = (product.price * rate).toFixed(2);
+
+        const card = document.createElement('div');
+        card.className = 'glass-panel';
+        card.style.padding = '1rem';
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                <h3 style="font-size:1.1rem;">${product.name}</h3>
+                <span class="status-badge ${status.class}">${status.label}</span>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">${product.sku}</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:bold; font-size:1.2rem;">${symbol}${price}</span>
+                <div>
+                   <button class="action-btn" onclick="openEditModal(${product.id})"><i class="fa-solid fa-pen"></i></button>
+                   <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function setupViewToggles() {
+    const toggles = document.querySelectorAll('[data-view]');
+    toggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const view = btn.dataset.view;
+            const parent = btn.closest('.content-section');
+
+            // Toggle buttons
+            parent.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Toggle content
+            const listView = parent.querySelector('.table-container');
+            const gridView = parent.querySelector('.inventory-grid');
+
+            if (view === 'list') {
+                listView.style.display = 'block';
+                gridView.style.display = 'none';
+            } else {
+                listView.style.display = 'none';
+                gridView.style.display = 'grid';
+                // Grid styling needs to be ensured in CSS
+                gridView.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+                gridView.style.gap = '1.5rem';
+            }
+        });
+    });
+}
+
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const productSearchInput = document.getElementById('productSearchInput');
+
+    const handleSearch = (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = products.filter(p =>
+            p.name.toLowerCase().includes(term) ||
+            p.sku.toLowerCase().includes(term) ||
+            p.category.toLowerCase().includes(term)
+        );
+        renderAllViews(filtered);
+    };
+
+    if (searchInput) searchInput.addEventListener('input', handleSearch);
+    if (productSearchInput) productSearchInput.addEventListener('input', handleSearch);
+}
 
 function renderAnalytics(data) {
     if (typeof Chart === 'undefined') {
