@@ -35,7 +35,7 @@ mvn clean package
 mvn spring-boot:run
 
 # Access application
-# http://localhost:8090
+# http://localhost:8080
 ```
 
 ### Using Docker
@@ -48,7 +48,7 @@ docker-compose up -d
 docker-compose ps
 
 # Test API
-curl http://localhost:8090/api/v1/products/health
+curl http://localhost:8080/api/v1/products/health
 
 # Stop services
 docker-compose down
@@ -84,10 +84,10 @@ curl -X POST http://localhost:8090/api/v1/products \
   }'
 
 # Get all products
-curl http://localhost:8090/api/v1/products
+curl http://localhost:8080/api/v1/products
 
 # Update inventory (add 5 units)
-curl -X PATCH http://localhost:8090/api/v1/products/1/inventory?quantity=5
+curl -X PATCH http://localhost:8080/api/v1/products/1/inventory?quantity=5
 ```
 
 ## Database Schema
@@ -186,7 +186,7 @@ mvn clean package
 
 # Docker test
 docker-compose up -d
-curl http://localhost:8090/api/v1/products/health
+curl http://localhost:8080/api/v1/products/health
 docker-compose down
 ```
 
@@ -210,7 +210,7 @@ bash linux-scripts/final-check.sh
 
 | Issue | Solution |
 |-------|----------|
-| Port 8090 in use | Change port in `application.properties` |
+| Port 8080 in use | Change port in `application.properties` |
 | MySQL connection error | Check `docker-compose ps` |
 | Maven build fails | Run `mvn clean install` |
 | Jenkins won't start | Run `bash jenkins/setup-jenkins.sh` |
@@ -279,12 +279,12 @@ MIT License - See LICENSE file
 **Bhavini Ajmera**
 
 - GitHub: [@06bhavi](https://github.com/06bhavi)
-- Email: bhavini@example.com
+- Email: bhavini765@gmail.com
 
 ## Support
 
 - GitHub Issues: [Create Issue](https://github.com/06bhavi/ecommerce-inventory-system/issues)
-- API Docs: http://localhost:8090
+- API Docs: http://localhost:8080
 - Jenkins: http://localhost:8081
 
 ---
