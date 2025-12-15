@@ -413,6 +413,9 @@ async function handleFormSubmit(e) {
         if (isEditMode) {
             url = `${API_URL}/${product.id}`;
             method = 'PUT';
+        } else {
+            // Remove id if it's empty to avoid deserialization issues for new products
+            delete product.id;
         }
 
         const res = await fetch(url, {
@@ -425,8 +428,9 @@ async function handleFormSubmit(e) {
             closeModal();
             fetchProducts();
         } else {
-            console.error(await res.json());
-            alert('Failed to save product.');
+            const errorData = await res.json();
+            console.error(errorData);
+            alert(errorData.message || 'Failed to save product.');
         }
     } catch (error) {
         console.error('Error saving product:', error);
