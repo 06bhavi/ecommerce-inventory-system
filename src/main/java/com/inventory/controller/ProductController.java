@@ -32,7 +32,7 @@ public class ProductController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
-        response.put("message", "Product created successfully");
+        response.put("message", "Product created successfully.");
         response.put("data", createdProduct);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
