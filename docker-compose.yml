@@ -38,7 +38,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: root123
       JAVA_OPTS: "-Xms256m -Xmx512m"
     ports:
-      - "8085:8080"
+      - "8080:8080"
     networks:
       - inventory-network
     healthcheck:

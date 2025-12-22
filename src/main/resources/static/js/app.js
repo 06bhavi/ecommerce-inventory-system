@@ -1,181 +1,104 @@
+// Main App Logic
 const API_URL = '/api/v1/products';
+const PLACEHOLDER_IMG = 'https://placehold.co/400x300/1e293b/ffffff?text=No+Image';
 let products = [];
 let isEditMode = false;
-let currentView = 'list';
-let currentCurrency = localStorage.getItem('inventory_currency') || 'USD';
-const currencyRates = {
-    'USD': 1,
-    'EUR': 0.92,
-    'INR': 83.50
-};
-const currencySymbols = {
-    'USD': '$',
-    'EUR': '€',
-    'INR': '₹'
+let currentProductId = null;
+
+// Currency Formatter
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(amount);
 };
 
-// Chart instances
-let categoryChart = null;
-let trendChart = null;
+// Fetch Stats
+async function fetchStats() {
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        const items = data.data;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize state
-    initializeSettings();
+        document.getElementById('totalProducts').innerText = items.length;
 
-    // Initial fetch
-    fetchProducts();
-    setupNavigation();
-    setupViewToggles();
-    setupSearch();
+        const totalVal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        document.getElementById('totalValue').innerText = formatCurrency(totalVal);
 
-    // Form submit
-    document.getElementById('productForm').addEventListener('submit', handleFormSubmit);
-});
-
-function initializeSettings() {
-    const currencySelect = document.querySelector('#settings-section select');
-    if (currencySelect) {
-        // Set initial value based on currentCurrency
-        Array.from(currencySelect.options).forEach(opt => {
-            if (opt.value.includes(currentCurrency) || opt.text.includes(currentCurrency)) {
-                currencySelect.value = opt.value || opt.text;
-            }
-        });
-
-        currencySelect.addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (val.includes('USD')) currentCurrency = 'USD';
-            else if (val.includes('EUR')) currentCurrency = 'EUR';
-            else if (val.includes('INR')) currentCurrency = 'INR';
-
-            localStorage.setItem('inventory_currency', currentCurrency);
-            // Re-render everything
-            renderAllViews(products);
-            // Check if renderStats exists before calling
-            if (typeof renderStats === 'function') {
-                renderStats(products);
-            }
-        });
+        const lowStock = items.filter(item => item.quantity < 5).length;
+        document.getElementById('lowStock').innerText = lowStock;
+    } catch (e) {
+        console.error('Error fetching stats:', e);
     }
 }
 
-function setupNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
-    const sections = document.querySelectorAll('.page-section');
+// Render Inventory List
+async function renderInventory() {
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        products = data.data;
 
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
+        const tbody = document.getElementById('productTableBody');
+        tbody.innerHTML = '';
 
-            // 1. Update active nav state
-            navItems.forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-
-            // 2. Identify target section
-            const targetId = item.dataset.target;
-            console.log('Navigating to:', targetId);
-
-            if (!targetId) return;
-
-            // 3. Hide all sections
-            sections.forEach(section => {
-                section.style.display = 'none';
-                section.classList.remove('active');
-            });
-
-            // 4. Show target section
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-                targetSection.classList.add('active');
-            } else {
-                console.error('Target section not found:', targetId);
-            }
-
-            // 5. Special handlers
-            if (targetId === 'analytics-section') {
-                renderAnalytics(products);
-            }
+        products.slice(0, 5).forEach(product => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="display:flex; align-items:center; gap:0.5rem;">
+                    <div style="width:32px; height:32px; background:rgba(255,255,255,0.1); border-radius:6px; display:flex; align-items:center; justify-content:center;">
+                        ${product.imageUrl ? `<img src="${product.imageUrl}" referrerpolicy="no-referrer" style="width:100%; height:100%; object-fit:contain; border-radius:6px;" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMG}';">` : `<img src="${PLACEHOLDER_IMG}" style="width:100%; height:100%; border-radius:6px;">`}
+                    </div>
+                    ${product.name}
+                </td>
+                <td>${product.sku}</td>
+                <td><span style="background:rgba(99, 102, 241, 0.2); color:#818cf8; padding:2px 8px; border-radius:12px; font-size:0.8rem;">${product.category || 'General'}</span></td>
+                <td>${formatCurrency(product.price)}</td>
+                <td>${product.quantity}</td>
+                <td><span class="status-badge ${getStatusClass(product.quantity)}">${product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</span></td>
+                <td>
+                    <button class="action-btn" onclick="editProduct(${product.id})"><i class="fa-solid fa-pen"></i></button>
+                    <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
-    });
+    } catch (e) {
+        console.error('Error rendering inventory:', e);
+    }
 }
 
-// Core Functions
+// Fetch All Products for Products Page
 async function fetchProducts() {
     try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        products = data.data || [];
-        renderAllViews(products);
-        renderStats(products);
-    } catch (error) {
-        console.error('Error fetching products:', error);
+        products = data.data;
+        renderProductsTable(products);
+    } catch (e) {
+        console.error(e);
     }
 }
 
-function renderAllViews(data) {
-    // Filter out deleted items if necessary, but backend should handle that.
-    renderListView('dashboard-list-view', data.slice(0, 5));
-    renderListView('products-list-view', data);
-
-    renderGridView('dashboard-grid-view', data.slice(0, 5));
-    renderGridView('products-grid-view', data);
-}
-
-function renderStats(data) {
-    const totalProducts = document.getElementById('totalProducts');
-    const totalValue = document.getElementById('totalValue');
-    const lowStock = document.getElementById('lowStock');
-
-    if (totalProducts) totalProducts.innerText = data.length;
-
-    if (totalValue) {
-        const total = data.reduce((sum, p) => sum + (p.price * p.quantity), 0);
-        // Convert based on currency
-        const rate = currencyRates[currentCurrency] || 1;
-        const symbol = currencySymbols[currentCurrency] || '$';
-        totalValue.innerText = `${symbol}${(total * rate).toFixed(2)}`;
-    }
-
-    if (lowStock) {
-        const low = data.filter(p => p.quantity < 10).length;
-        lowStock.innerText = low;
-    }
-}
-
-function renderListView(elementId, data) {
-    const container = document.getElementById(elementId);
-    if (!container) return;
-
-    const tbody = container.querySelector('tbody');
-    if (!tbody) return;
-
+function renderProductsTable(items) {
+    const tbody = document.getElementById('allProductsTableBody');
     tbody.innerHTML = '';
-
-    if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No products found</td></tr>';
-        return;
-    }
-
-    data.forEach(product => {
-        const status = getStockStatus(product.quantity);
-        const rate = currencyRates[currentCurrency] || 1;
-        const symbol = currencySymbols[currentCurrency] || '$';
-        const price = (product.price * rate).toFixed(2);
-
+    items.forEach(product => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>
-                <div style="font-weight: 500;">${product.name}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">${product.description || ''}</div>
+            <td style="display:flex; align-items:center; gap:0.5rem;">
+                <div style="width:32px; height:32px; background:rgba(255,255,255,0.1); border-radius:6px; display:flex; align-items:center; justify-content:center;">
+                    ${product.imageUrl ? `<img src="${product.imageUrl}" referrerpolicy="no-referrer" style="width:100%; height:100%; object-fit:contain; border-radius:6px;" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMG}';">` : `<img src="${PLACEHOLDER_IMG}" style="width:100%; height:100%; border-radius:6px;">`}
+                </div>
+                ${product.name}
             </td>
             <td>${product.sku}</td>
-            <td><span class="status-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">${product.category}</span></td>
-            <td>${symbol}${price}</td>
+            <td><span style="background:rgba(99, 102, 241, 0.2); color:#818cf8; padding:2px 8px; border-radius:12px; font-size:0.8rem;">${product.category || 'General'}</span></td>
+            <td>${formatCurrency(product.price)}</td>
             <td>${product.quantity}</td>
-            <td><span class="status-badge ${status.class}">${status.label}</span></td>
+            <td><span class="status-badge ${getStatusClass(product.quantity)}">${product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</span></td>
             <td>
-                <button class="action-btn" onclick="openEditModal(${product.id})"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" onclick="editProduct(${product.id})"><i class="fa-solid fa-pen"></i></button>
                 <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
@@ -183,228 +106,68 @@ function renderListView(elementId, data) {
     });
 }
 
-function renderGridView(elementId, data) {
-    const container = document.getElementById(elementId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    data.forEach(product => {
-        const status = getStockStatus(product.quantity);
-        const rate = currencyRates[currentCurrency] || 1;
-        const symbol = currencySymbols[currentCurrency] || '$';
-        const price = (product.price * rate).toFixed(2);
-
-        const card = document.createElement('div');
-        card.className = 'glass-panel';
-        card.style.padding = '1rem';
-        card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-                <h3 style="font-size:1.1rem;">${product.name}</h3>
-                <span class="status-badge ${status.class}">${status.label}</span>
-            </div>
-            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">${product.sku}</p>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:bold; font-size:1.2rem;">${symbol}${price}</span>
-                <div>
-                   <button class="action-btn" onclick="openEditModal(${product.id})"><i class="fa-solid fa-pen"></i></button>
-                   <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
+function getStatusClass(qty) {
+    if (qty <= 0) return 'status-outstock';
+    if (qty < 10) return 'status-lowstock';
+    return 'status-instock';
 }
 
-function setupViewToggles() {
-    const toggles = document.querySelectorAll('[data-view]');
-    toggles.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const view = btn.dataset.view;
-            const parent = btn.closest('.content-section');
+// Modal Functions
+function openModal(edit = false) {
+    const modal = document.getElementById('productModal');
+    const title = document.getElementById('modalTitle');
+    const form = document.getElementById('productForm');
 
-            // Toggle buttons
-            parent.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    const submitBtn = document.getElementById('modalSubmitBtn');
+    modal.classList.add('active');
 
-            // Toggle content
-            const listView = parent.querySelector('.table-container');
-            const gridView = parent.querySelector('.inventory-grid');
-
-            if (view === 'list') {
-                listView.style.display = 'block';
-                gridView.style.display = 'none';
-            } else {
-                listView.style.display = 'none';
-                gridView.style.display = 'grid';
-                // Grid styling needs to be ensured in CSS
-                gridView.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
-                gridView.style.gap = '1.5rem';
-            }
-        });
-    });
-}
-
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const productSearchInput = document.getElementById('productSearchInput');
-
-    const handleSearch = (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = products.filter(p =>
-            p.name.toLowerCase().includes(term) ||
-            p.sku.toLowerCase().includes(term) ||
-            p.category.toLowerCase().includes(term)
-        );
-        renderAllViews(filtered);
-    };
-
-    if (searchInput) searchInput.addEventListener('input', handleSearch);
-    if (productSearchInput) productSearchInput.addEventListener('input', handleSearch);
-}
-
-function renderAnalytics(data) {
-    if (typeof Chart === 'undefined') {
-        console.warn('Chart.js is not loaded.');
-        return;
+    if (edit) {
+        title.innerText = 'Edit Product';
+        submitBtn.innerText = 'Update Product';
+        isEditMode = true;
+    } else {
+        title.innerText = 'Add New Product';
+        submitBtn.innerText = 'Create Product';
+        form.reset();
+        isEditMode = false;
+        currentProductId = null;
     }
-
-    // 1. Category Distribution
-    const categories = {};
-    data.forEach(p => {
-        const cat = p.category || 'Uncategorized';
-        categories[cat] = (categories[cat] || 0) + 1;
-    });
-
-    const categoryCtx = document.getElementById('categoryChart');
-    if (categoryCtx) {
-        if (categoryChart) categoryChart.destroy();
-        categoryChart = new Chart(categoryCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(categories),
-                datasets: [{
-                    label: 'Items per Category',
-                    data: Object.values(categories),
-                    backgroundColor: [
-                        'rgba(99, 102, 241, 0.7)',
-                        'rgba(236, 72, 153, 0.7)',
-                        'rgba(20, 184, 166, 0.7)',
-                        'rgba(251, 191, 36, 0.7)'
-                    ],
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: { display: true, text: 'Product Distribution', color: '#94a3b8' }
-                },
-                scales: {
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                }
-            }
-        });
-    }
-
-    // 2. Stock Trends (Mock Data based on real stock levels)
-    // In a real app, this would come from historical data endpoint.
-    // We will generate a mock trend based on current stock.
-    const trendCtx = document.getElementById('trendChart');
-    if (trendCtx) {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        // Mock randomized trend ending at current total stock
-        const currentTotal = data.reduce((a, b) => a + b.quantity, 0);
-        const trendData = months.map((_, i) => {
-            if (i === 5) return currentTotal;
-            return Math.floor(currentTotal * (0.5 + Math.random() * 0.5));
-        });
-
-        if (trendChart) trendChart.destroy();
-        trendChart = new Chart(trendCtx, {
-            type: 'line',
-            data: {
-                labels: months,
-                datasets: [{
-                    label: 'Total Stock Level',
-                    data: trendData,
-                    borderColor: '#14b8a6',
-                    backgroundColor: 'rgba(20, 184, 166, 0.2)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: { display: true, text: 'Stock History', color: '#94a3b8' }
-                },
-                scales: {
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                }
-            }
-        });
-    }
-}
-
-function getStockStatus(qty) {
-    if (qty === 0) return { label: 'Out of Stock', class: 'status-outstock' };
-    if (qty < 10) return { label: 'Low Stock', class: 'status-lowstock' };
-    return { label: 'In Stock', class: 'status-instock' };
-}
-
-// Modal Functions - Kept similar but simplified
-function openModal() {
-    isEditMode = false;
-    document.getElementById('modalTitle').innerText = 'Add New Product';
-    document.getElementById('productForm').reset();
-    document.getElementById('productId').value = '';
-    document.getElementById('productModal').classList.add('active');
-}
-
-function openEditModal(id) {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-
-    isEditMode = true;
-    document.getElementById('modalTitle').innerText = 'Edit Product';
-
-    // Populate form
-    document.getElementById('productId').value = product.id;
-    document.getElementById('productName').value = product.name;
-    document.getElementById('productSku').value = product.sku;
-    document.getElementById('productDescription').value = product.description;
-
-    // Reverse currency conversion for editing? 
-    // Usually we edit in base currency (USD). 
-    // Assuming backend stores USD.
-    document.getElementById('productPrice').value = product.price;
-
-    document.getElementById('productQuantity').value = product.quantity;
-    document.getElementById('productCategory').value = product.category;
-
-    document.getElementById('productModal').classList.add('active');
 }
 
 function closeModal() {
     document.getElementById('productModal').classList.remove('active');
-    document.getElementById('productForm').reset();
-    isEditMode = false;
 }
+
+// Edit Product
+function editProduct(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
+    document.getElementById('productId').value = product.id;
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productSku').value = product.sku;
+    document.getElementById('productCategory').value = product.category; // Now handled
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productQuantity').value = product.quantity;
+    document.getElementById('productDescription').value = product.description;
+    document.getElementById('productImageUrl').value = product.imageUrl || ''; // New field
+
+    currentProductId = id;
+    openModal(true);
+}
+
+// Form Submit
+document.getElementById('productForm').addEventListener('submit', handleFormSubmit);
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-    console.log('Form submission started');
+
     const formData = new FormData(e.target);
     const product = Object.fromEntries(formData.entries());
-    console.log('Product data to submit:', product);
+
+    // Fix types
+    product.price = parseFloat(product.price);
+    product.quantity = parseInt(product.quantity);
 
     try {
         let url = API_URL;
@@ -427,6 +190,8 @@ async function handleFormSubmit(e) {
         if (res.ok) {
             closeModal();
             fetchProducts();
+            renderInventory(); // Refresh dashboard list too
+            fetchStats();      // Refresh stats
         } else {
             const errorData = await res.json();
             console.error(errorData);
@@ -442,8 +207,216 @@ async function deleteProduct(id) {
         try {
             await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
             fetchProducts();
+            renderInventory();
+            fetchStats();
         } catch (error) {
             console.error('Error deleting:', error);
         }
     }
+}
+
+// --- Orders Logic ---
+async function loadOrders() {
+    const tableBody = document.getElementById('ordersTableBody');
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
+
+    try {
+        const response = await fetch('/api/v1/products/orders');
+        const data = await response.json();
+        const orders = data.data;
+
+        if (!orders || orders.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No orders found</td></tr>';
+            return;
+        }
+
+        tableBody.innerHTML = orders.map(order => `
+            <tr>
+                <td>#${order.id}</td>
+                <td>${order.customerEmail || 'Guest'}</td>
+                <td>${new Date(order.orderDate).toLocaleString()}</td>
+                <td><span class="status-badge ${order.paymentMethod === 'ONLINE' ? 'status-instock' : 'status-lowstock'}">${order.paymentMethod || 'N/A'}</span></td>
+                <td style="max-width: 200px; padding: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;" title="${order.shippingAddress || ''}">${order.shippingAddress || 'N/A'}</td>
+                <td>$${order.totalAmount.toFixed(2)}</td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Error loading orders</td></tr>';
+    }
+}
+
+// --- Navigation Logic ---
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        if (item.getAttribute('href').includes('.html')) return; // Allow external links like Storefront
+
+        e.preventDefault();
+
+        // Remove active class
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
+
+        // Add active
+        item.classList.add('active');
+        const targetId = item.dataset.target;
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) targetSection.classList.add('active');
+
+        // Load data if needed
+        if (targetId === 'products-section') {
+            fetchProducts();
+        } else if (targetId === 'orders-section') {
+            loadOrders();
+        } else if (targetId === 'analytics-section') {
+            initCharts();
+        }
+    });
+});
+
+// --- Analytics Logic ---
+let categoryChart = null;
+let trendChart = null;
+
+async function initCharts() {
+    // Prevent re-rendering if already exists
+    if (categoryChart || trendChart) return;
+
+    // Fetch real data or use memoized/current data if available
+    // For now using current 'products' array
+
+    // 1. Category Distribution
+    const categoryCounts = {};
+    products.forEach(p => {
+        const cat = p.category || 'Uncategorized';
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    });
+
+    const ctx1 = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(categoryCounts),
+            datasets: [{
+                data: Object.values(categoryCounts),
+                backgroundColor: ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b'],
+                borderColor: 'transparent'
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+            }
+        }
+    });
+
+    // 2. Stock Trends (Mock Data for demo as we don't have historical data)
+    const ctx2 = document.getElementById('trendChart').getContext('2d');
+    trendChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Stock Level',
+                data: [65, 59, 80, 81, 56, 55, products.length], // Ending with current count
+                borderColor: '#14b8a6',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(20, 184, 166, 0.1)'
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
+    });
+}
+
+// Initial load
+fetchStats();
+renderInventory();
+
+// Fix Navigation Visibility (Helper)
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        const href = item.getAttribute('href');
+        if (href && href.includes('.html')) return;
+
+        e.preventDefault();
+
+        // 1. Update Nav State
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+
+        // 2. Update Section Visibility
+        document.querySelectorAll('.page-section').forEach(section => {
+            section.classList.remove('active');
+            section.style.display = 'none'; // Force hide
+        });
+
+        const targetId = item.dataset.target;
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+            targetSection.style.display = 'block'; // Force show overriding inline styles
+
+            // Trigger data load
+            if (targetId === 'dashboard-section') {
+                fetchStats();
+                renderInventory();
+            }
+            if (targetId === 'products-section') fetchProducts();
+            if (targetId === 'orders-section') loadOrders();
+            if (targetId === 'analytics-section') initCharts();
+        }
+    });
+});
+
+// --- Settings Logic ---
+console.log('Initializing Settings Logic...');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const notificationsToggle = document.getElementById('notificationsToggle');
+
+if (darkModeToggle) console.log('Dark mode toggle found');
+if (notificationsToggle) console.log('Notifications toggle found');
+
+// 1. Dark Mode Init
+if (darkModeToggle) {
+    const isDarkMode = localStorage.getItem('darkMode') !== 'false'; // Default to true
+    applyDarkMode(isDarkMode);
+    darkModeToggle.checked = isDarkMode;
+
+    darkModeToggle.addEventListener('change', (e) => {
+        applyDarkMode(e.target.checked);
+    });
+}
+
+function applyDarkMode(isDark) {
+    if (isDark) {
+        document.body.classList.remove('light-mode');
+        localStorage.setItem('darkMode', 'true');
+    } else {
+        document.body.classList.add('light-mode');
+        localStorage.setItem('darkMode', 'false');
+    }
+}
+
+// 2. Notifications logic
+if (notificationsToggle) {
+    const areNotificationsEnabled = localStorage.getItem('notifications') === 'true'; // Default false? Or true?
+    // Let's default to true as per UI "checked"
+    notificationsToggle.checked = localStorage.getItem('notifications') !== 'false';
+
+    notificationsToggle.addEventListener('change', (e) => {
+        const enabled = e.target.checked;
+        localStorage.setItem('notifications', enabled);
+        if (enabled) {
+            alert('Notifications enabled!');
+        } else {
+            console.log('Notifications disabled');
+        }
+    });
 }

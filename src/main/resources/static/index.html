@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory OS | Future of Retail</title>
-    <link rel="stylesheet" href="css/style.css?v=8">
-    <link rel="stylesheet" href="css/grid.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=12">
+    <link rel="stylesheet" href="css/grid.css?v=12">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -26,11 +26,20 @@
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" data-target="dashboard-section"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
                 <a href="#" class="nav-item" data-target="products-section"><i class="fa-solid fa-box-open"></i> Products</a>
+                <a href="#" class="nav-item" data-target="orders-section"><i class="fa-solid fa-receipt"></i> Orders</a>
                 <a href="#" class="nav-item" data-target="analytics-section"><i class="fa-solid fa-chart-line"></i> Analytics</a>
                 <a href="#" class="nav-item" data-target="settings-section"><i class="fa-solid fa-gear"></i> Settings</a>
+
             </nav>
 
             <div class="user-profile">
+                <!-- Added Link -->
+                <a href="storefront.html" style="margin-right: auto; color: var(--primary); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); text-decoration: none;" title="Go to Storefront">
+                    <i class="fa-solid fa-shop"></i>
+                </a>
+                <!-- Added Link -->
+
+                
                 <div class="avatar">AD</div>
                 <div class="info">
                     <p class="name">Admin User</p>
@@ -155,6 +164,37 @@
                 </div>
             </section>
 
+            <!-- Orders Section -->
+            <section id="orders-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <h2>Orders Management</h2>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Search orders...">
+                    </div>
+                </header>
+
+                <div class="content-section">
+                    <div class="table-container glass-panel">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Payment</th>
+                                    <th>Address</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <!-- Orders injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- Analytics Section -->
             <section id="analytics-section" class="page-section" style="display: none;">
                 <header class="top-bar">
@@ -184,7 +224,7 @@
                             <p>Enable immersive dark theme</p>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="darkModeToggle" checked>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -194,7 +234,7 @@
                             <p>Email alerts for low stock</p>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="notificationsToggle" checked>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -233,6 +273,10 @@
                         <input type="text" name="sku" id="productSku" required placeholder="Generate SKU...">
                     </div>
                     <div class="form-group full-width">
+                        <label>Image URL</label>
+                        <input type="url" name="imageUrl" id="productImageUrl" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group full-width">
                         <label>Description</label>
                         <textarea name="description" id="productDescription" required placeholder="Product details..."></textarea>
                     </div>
@@ -256,13 +300,13 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-primary">Create Product</button>
+                    <button type="submit" class="btn-primary" id="modalSubmitBtn">Create Product</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/app.js?v=8"></script>
+    <script src="js/app.js?v=12"></script>
 </body>
 </html>

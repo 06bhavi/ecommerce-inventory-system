@@ -160,4 +160,15 @@ public class ProductController {
         response.put("version", "1.0.0");
         return ResponseEntity.ok(response);
     }
+
+    // Get All Orders
+    @GetMapping("/orders")
+    public ResponseEntity<Map<String, Object>> getAllOrders() {
+        List<com.inventory.model.Order> orders = productService.getAllOrders();
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("count", orders.size());
+        response.put("data", orders);
+        return ResponseEntity.ok(response);
+    }
 }

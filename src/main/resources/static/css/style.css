@@ -167,6 +167,10 @@ body {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
+    height: 100vh;
+    /* Ensure it takes full height to allow internal scrolling */
+    position: relative;
+    /* Context */
 }
 
 .page-section {
@@ -620,4 +624,36 @@ input:checked+.slider:before {
 
 .glass-select option {
     background: #1e293b;
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+    --bg-dark: #f0f4f8;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(99, 102, 241, 0.1);
+    --text-main: #0f172a;
+    --text-muted: #475569;
+}
+
+body.light-mode .sidebarガラス {
+    background: rgba(255, 255, 255, 0.8);
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .modal-glass {
+    background: #ffffff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .form-group input,
+body.light-mode .form-group textarea,
+body.light-mode .glass-select {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+body.light-mode .search-bar {
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }

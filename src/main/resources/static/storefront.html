@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Store | Future Retail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-brand i { color: var(--primary); filter: drop-shadow(0 0 10px var(--primary-glow)); }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            width: 400px;
+        }
+        .search-container input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            margin-left: 0.5rem;
+            font-family: inherit;
+            color: white;
+        }
+        
+        .nav-actions { display: flex; gap: 1.5rem; align-items: center; }
+        .action-icon { font-size: 1.25rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+        .action-icon:hover { color: var(--primary); }
+        
+        /* Layout */
+        .store-layout { display: flex; gap: 2rem; max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        
+        /* Filters */
+        .filters .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+        h3, h4 { color: var(--text-main); }
+        
+        /* Products */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .product-card {
+            background: var(--glass-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+        
+        .product-image {
+            height: 220px;
+            background: rgba(15, 23, 42, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .product-details { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+        .product-title { color: var(--text-main); font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .product-price { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: auto 0 1rem 0; }
+        
+        .add-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .add-btn:hover { opacity: 0.9; }
+        .add-btn:disabled { background: #334155; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
+
+        /* Cart Modal */
+        .cart-modal {
+            background: #1e293b;
+            border-left: 1px solid var(--glass-border);
+            color: var(--text-main);
+             position: fixed; top: 0; right: -400px; width: 400px; height: 100vh;
+             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+             display: flex; flex-direction: column;
+        }
+        .cart-modal.active { right: 0; }
+        .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
+        .cart-header button { color: var(--text-muted); }
+        .cart-footer { padding: 1.5rem; border-top: 1px solid var(--glass-border); background: rgba(15, 23, 42, 0.3); }
+        
+        .cart-item-img { background: rgba(15, 23, 42, 0.5); }
+        
+        /* Inputs in Modal */
+        input, textarea {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+        }
+        input:focus { border-color: var(--primary); }
+
+        /* Payment Options */
+        .payment-option .option-content {
+            background: rgba(15, 23, 42, 0.5);
+            border-color: var(--glass-border);
+            color: var(--text-muted);
+        }
+        .payment-option input:checked + .option-content {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .category-tag { color: var(--primary); }
+        
+        /* Background Globes */
+        .background-globes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .globe { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.2; }
+        .globe-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; left: -100px; }
+        .globe-2 { width: 500px; height: 500px; background: #ec4899; bottom: -100px; right: -100px; }
+
+        .cart-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            z-index: 999; display: none;
+        }
+        .cart-overlay.active { display: block; }
+
+        .cart-item { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .cart-item-img { width: 64px; height: 64px; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .stock-badge { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.875rem; font-weight: 500; padding: 0.25rem 0; margin-bottom: 1rem; }
+        .stock-badge.out { color: #ef4444; }
+        .stock-badge.low { color: #f59e0b; }
+        .stock-badge.in { color: #10b981; }
+
+        .payment-options { display: flex; flex-direction: column; gap: 1rem; }
+        .payment-option { cursor: pointer; }
+        .payment-option input { display: none; }
+        .payment-option .option-content {
+            padding: 1rem;
+            border: 2px solid; 
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+        .payment-option i { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="#" class="nav-brand">
+            <i class="fas fa-boxes"></i> NexusInv
+        </a>
+        
+        <div class="search-container">
+            <i class="fas fa-search" style="color: #94a3b8;"></i>
+            <input type="text" id="storeSearch" placeholder="Search for products...">
+        </div>
+
+        <div class="nav-actions">
+            <a href="index.html" class="action-icon" title="Go to Admin Dashboard">
+                <i class="fas fa-user-shield"></i>
+            </a>
+            <div class="action-icon" onclick="toggleCart()" style="position: relative;">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-count" id="cartCount" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center;">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="store-layout" style="display: flex; gap: 2rem; max-width: 1400px; margin: 2rem auto; padding: 0 2rem;">
+        
+        <!-- Filter Sidebar -->
+        <aside class="filters" style="width: 250px; flex-shrink: 0; position: sticky; top: 100px; height: fit-content;">
+            <div class="glass-panel" style="padding: 1.5rem; border-radius: 16px;">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Filters</h3>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; font-weight: 600;">Category</h4>
+                    <div id="categoryFilters" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <!-- Categories injected via JS -->
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; font-weight: 600;">Price Range</h4>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="number" id="minPrice" placeholder="Min" style="width: 100%;">
+                        <span>-</span>
+                        <input type="number" id="maxPrice" placeholder="Max" style="width: 100%;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-muted);">
+                        <input type="checkbox" id="stockFilter" style="width: 16px; height: 16px;">
+                        <span style="font-size: 0.9rem;">Show In-Stock Only</span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div style="flex: 1;">
+            <h1 style="font-size: 2rem; margin-bottom: 2rem; font-weight: 700;">Latest Drops</h1>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2 id="modalTitle" style="font-size: 1.25rem; font-weight: 600;">Your Cart</h2>
+            <button onclick="toggleCart()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="cart-body" id="cartBody">
+            <!-- Step 1: Cart Items -->
+            <div id="step-cart" class="checkout-step active">
+                <div id="cartItems"></div>
+            </div>
+
+            <!-- Step 2: Payment Method -->
+            <div id="step-payment" class="checkout-step" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Select Payment Method</h3>
+                <div class="payment-options">
+                    <label class="payment-option" onclick="selectPayment('COD')">
+                        <input type="radio" name="payment" value="COD" checked>
+                        <div class="option-content">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Cash on Delivery</span>
+                        </div>
+                    </label>
+                    <label class="payment-option" onclick="selectPayment('ONLINE')">
+                        <input type="radio" name="payment" value="ONLINE">
+                        <div class="option-content">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Pay Online (Card/UPI)</span>
+                        </div>
+                    </label>
+                </div>
+                
+                <!-- Online Payment Form -->
+                <div id="online-payment-form" style="display: none; margin-top: 1.5rem; background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-bottom: 1rem; font-size: 0.95rem;">Enter Card Details</h4>
+                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                        <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <input type="text" id="cardCvc" placeholder="CVC" maxlength="3" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Address & Details -->
+            <div id="step-address" class="checkout-step" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Shipping Details</h3>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #64748b;">Email Address</label>
+                    <input type="email" id="customerEmail" placeholder="john@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #64748b;">Shipping Address</label>
+                    <textarea id="shippingAddress" placeholder="123 Main St, City, Country" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div id="cartTotalRow" style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">
+                <span>Total</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            
+            <button id="checkoutBtn" onclick="nextStep()" class="add-btn" style="background: #2563eb;">Checkout Now</button>
+            <button id="backBtn" onclick="prevStep()" class="add-btn" style="background: #94a3b8; margin-top: 0.5rem; display: none;">Back</button>
+        </div>
+    </div>
+
+    <!-- Track Order Modal -->
+    <div class="cart-overlay" id="orderOverlay" onclick="closeOrderTrackModal()"></div>
+    <div id="orderModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 1px solid rgba(255,255,255,0.08); padding: 2rem; border-radius: 16px; width: 600px; max-width: 90%; z-index: 2000; display: none; color: white;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem;">My Orders</h2>
+            <button onclick="closeOrderTrackModal()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="emailInputSection">
+            <p style="margin-bottom: 1rem; color: #94a3b8;">Enter your email to view your order history.</p>
+            <div style="display: flex; gap: 1rem;">
+                <input type="email" id="trackEmail" placeholder="john@example.com" style="flex: 1;">
+                <button onclick="fetchMyOrders()" style="background: #6366f1; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; cursor: pointer;">View</button>
+            </div>
+        </div>
+
+        <div id="orderListSection" style="margin-top: 2rem; max-height: 400px; overflow-y: auto;">
+             <!-- Orders Injected Here -->
+        </div>
+    </div>
+
+    <script src="js/storefront.js?v=12"></script>
+</body>
+</html>

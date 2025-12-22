@@ -62,8 +62,16 @@ public class ProductService {
         product.setName(productDetails.getName());
         product.setDescription(productDetails.getDescription());
         product.setPrice(productDetails.getPrice());
-        product.setQuantity(productDetails.getQuantity());
+        product.setSku(productDetails.getSku());
         product.setCategory(productDetails.getCategory());
+        product.setImageUrl(productDetails.getImageUrl());
+        product.setQuantity(productDetails.getQuantity());
+
+        if (product.getQuantity() <= 0) {
+            product.setStatus("OUT_OF_STOCK");
+        } else {
+            product.setStatus("IN_STOCK");
+        }
 
         return productRepository.save(product);
     }
@@ -80,12 +88,27 @@ public class ProductService {
     public Product updateInventory(Long id, Integer quantity) {
         logger.info("Updating inventory for product ID: {} with quantity: {}", id, quantity);
         Product product = getProductById(id);
-        product.setQuantity(product.getQuantity() + quantity);
+        int newQuantity = product.getQuantity() + quantity;
+        product.setQuantity(newQuantity);
+
+        if (newQuantity <= 0) {
+            product.setStatus("OUT_OF_STOCK");
+        } else {
+            product.setStatus("IN_STOCK");
+        }
+
         return productRepository.save(product);
     }
 
     public boolean isInStock(Long id) {
         Product product = getProductById(id);
         return product.getQuantity() > 0;
+    }
+
+    @Autowired
+    private com.inventory.repository.OrderRepository orderRepository;
+
+    public List<com.inventory.model.Order> getAllOrders() {
+        return orderRepository.findAll();
     }
 }
