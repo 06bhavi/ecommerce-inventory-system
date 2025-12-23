@@ -63,6 +63,9 @@ async function renderInventory() {
             `;
             tbody.appendChild(tr);
         });
+
+        // Also render Grid View
+        renderGridView(products.slice(0, 5), 'dashboard-grid-view');
     } catch (e) {
         console.error('Error rendering inventory:', e);
     }
@@ -104,6 +107,8 @@ function renderProductsTable(items) {
         `;
         tbody.appendChild(tr);
     });
+    // Also render Grid View
+    renderGridView(items, 'products-grid-view');
 }
 
 function getStatusClass(qty) {
@@ -420,3 +425,79 @@ if (notificationsToggle) {
         }
     });
 }
+
+// --- View Toggle Logic ---
+// Helper to render Grid View
+function renderGridView(items, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    items.forEach(product => {
+        const div = document.createElement('div');
+        div.className = 'product-card';
+        div.innerHTML = `
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">${product.name}</h3>
+                    <span style="font-size: 0.8rem; color: #94a3b8;">${product.sku}</span>
+                </div>
+                <span class="card-category">${product.category || 'General'}</span>
+            </div>
+            
+            <div style="margin-bottom: 1rem; height: 150px; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                 ${product.imageUrl ? `<img src="${product.imageUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='${PLACEHOLDER_IMG}'">` : `<img src="${PLACEHOLDER_IMG}" style="width:100%; height:100%; object-fit:cover;">`}
+            </div>
+
+            <div class="card-stats">
+                <div class="card-stat-item">
+                    <label>Price</label>
+                    <span style="color: #10b981;">${formatCurrency(product.price)}</span>
+                </div>
+                <div class="card-stat-item">
+                    <label>Stock</label>
+                    <span class="${getStatusClass(product.quantity)}">${product.quantity}</span>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <span style="font-size: 0.8rem; color: #64748b;">${product.quantity > 0 ? 'Available' : 'Unavailable'}</span>
+                <div class="card-actions">
+                    <button class="action-btn" onclick="editProduct(${product.id})"><i class="fa-solid fa-pen"></i></button>
+                    <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Initialize View Toggles
+document.querySelectorAll('.view-options .icon-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const button = e.currentTarget;
+
+        // 1. Toggle Active State
+        const parent = button.parentElement;
+        parent.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+
+        // 2. Determine Context (Dashboard or Products)
+        const viewType = button.dataset.view; // 'list' or 'grid'
+        const section = button.closest('.content-section');
+
+        if (!section) return;
+
+        const listView = section.querySelector('.table-container');
+        const gridView = section.querySelector('.inventory-grid');
+
+        if (viewType === 'grid') {
+            if (listView) listView.style.display = 'none';
+            if (gridView) gridView.style.display = 'grid';
+        } else {
+            if (listView) listView.style.display = 'block';
+            if (gridView) gridView.style.display = 'none';
+        }
+    });
+});
