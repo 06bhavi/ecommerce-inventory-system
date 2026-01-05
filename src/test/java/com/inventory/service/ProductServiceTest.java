@@ -1,7 +1,7 @@
 package com.inventory.service;
 
 import com.inventory.model.Product;
-import com.inventory.repository.ProductRepository;
+import com.inventory.repository.jpa.ProductRepository;
 import com.inventory.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

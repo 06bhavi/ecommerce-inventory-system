@@ -35,6 +35,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler({ ProductNotFoundException.class, ReviewNotFoundException.class })
+    public ResponseEntity<Map<String, Object>> handleCustomNotFound(RuntimeException ex) {
+        logger.error("Resource not found: {}", ex.getMessage());
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AnalyticsException.class)
+    public ResponseEntity<Map<String, Object>> handleAnalyticsException(AnalyticsException ex) {
+        logger.error("Analytics error: {}", ex.getMessage());
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Analytics Error");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {

@@ -23,6 +23,25 @@ services:
       retries: 10
       interval: 10s
 
+  # MongoDB Service
+  mongodb:
+    image: mongo:7.0
+    container_name: inventory-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: inventory_analytics_db
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - inventory-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
   # Java Application Service
   app:
     build:
@@ -32,10 +51,10 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/inventory_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root123
+      SPRING_PROFILES_ACTIVE: prod
       JAVA_OPTS: "-Xms256m -Xmx512m"
     ports:
       - "8080:8080"
@@ -49,6 +68,8 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
+  mongo_data:
     driver: local
 
 networks:

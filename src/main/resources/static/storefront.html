@@ -272,8 +272,16 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
+    <!-- Main Content -->
         <div style="flex: 1;">
+            <!-- Trending Section -->
+            <div id="trendingSection" style="margin-bottom: 3rem; display: none;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600; color: #f59e0b;"><i class="fas fa-fire"></i> Trending Now</h2>
+                <div class="products-grid" id="trendingGrid">
+                    <!-- Trending items injected here -->
+                </div>
+            </div>
+
             <h1 style="font-size: 2rem; margin-bottom: 2rem; font-weight: 700;">Latest Drops</h1>
             <div class="products-grid" id="productsGrid">
                 <!-- Products injected here -->
@@ -281,103 +289,56 @@
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-    <div class="cart-modal" id="cartModal">
-        <div class="cart-header">
-            <h2 id="modalTitle" style="font-size: 1.25rem; font-weight: 600;">Your Cart</h2>
-            <button onclick="toggleCart()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+    <!-- Review/Details Modal -->
+    <div class="cart-overlay" id="reviewOverlay" onclick="closeReviewModal()"></div>
+    <div id="reviewModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 1px solid rgba(255,255,255,0.08); padding: 0; border-radius: 16px; width: 800px; max-width: 95%; height: 80vh; z-index: 2000; display: none; color: white; display: flex; flex-direction: column; overflow: hidden; display: none;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+            <h2 id="reviewModalTitle" style="font-size: 1.25rem;">Product Details</h2>
+            <button onclick="closeReviewModal()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
         </div>
-        
-        <div class="cart-body" id="cartBody">
-            <!-- Step 1: Cart Items -->
-            <div id="step-cart" class="checkout-step active">
-                <div id="cartItems"></div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; gap: 2rem;">
+            <!-- Product Info (Left) -->
+            <div style="flex: 1;">
+                <div id="reviewProductImage" style="height: 250px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden;">
+                    <img src="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+                <h3 id="reviewProductName" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Product Name</h3>
+                <p id="reviewProductDesc" style="color: #94a3b8; line-height: 1.6; margin-bottom: 1rem;">Description goes here...</p>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #6366f1;" id="reviewProductPrice">$0.00</div>
             </div>
 
-            <!-- Step 2: Payment Method -->
-            <div id="step-payment" class="checkout-step" style="display: none;">
-                <h3 style="margin-bottom: 1rem;">Select Payment Method</h3>
-                <div class="payment-options">
-                    <label class="payment-option" onclick="selectPayment('COD')">
-                        <input type="radio" name="payment" value="COD" checked>
-                        <div class="option-content">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <span>Cash on Delivery</span>
-                        </div>
-                    </label>
-                    <label class="payment-option" onclick="selectPayment('ONLINE')">
-                        <input type="radio" name="payment" value="ONLINE">
-                        <div class="option-content">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Pay Online (Card/UPI)</span>
-                        </div>
-                    </label>
-                </div>
+            <!-- Reviews (Right) -->
+            <div style="flex: 1; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 2rem; display: flex; flex-direction: column;">
+                <h3 style="margin-bottom: 1rem;">Customer Reviews</h3>
                 
-                <!-- Online Payment Form -->
-                <div id="online-payment-form" style="display: none; margin-top: 1.5rem; background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h4 style="margin-bottom: 1rem; font-size: 0.95rem;">Enter Card Details</h4>
-                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                        <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    </div>
-                    <div style="display: flex; gap: 0.75rem;">
-                        <div class="form-group" style="flex: 1;">
-                            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <input type="text" id="cardCvc" placeholder="CVC" maxlength="3" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
-                        </div>
-                    </div>
+                <div id="reviewsList" style="flex: 1; overflow-y: auto; margin-bottom: 1rem; padding-right: 0.5rem;">
+                    <!-- Reviews injected here -->
+                    <div style="text-align: center; color: #64748b; padding-top: 2rem;">Loading reviews...</div>
                 </div>
-            </div>
 
-            <!-- Step 3: Address & Details -->
-            <div id="step-address" class="checkout-step" style="display: none;">
-                <h3 style="margin-bottom: 1rem;">Shipping Details</h3>
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #64748b;">Email Address</label>
-                    <input type="email" id="customerEmail" placeholder="john@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px;">
-                </div>
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #64748b;">Shipping Address</label>
-                    <textarea id="shippingAddress" placeholder="123 Main St, City, Country" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit;"></textarea>
+                <!-- Add Review Form -->
+                <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; margin-top: auto;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Write a Review</h4>
+                    <form id="addReviewForm" onsubmit="submitReview(event)">
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <select id="newReviewRating" style="width: 80px; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                                <option value="5">★★★★★</option>
+                                <option value="4">★★★★☆</option>
+                                <option value="3">★★★☆☆</option>
+                                <option value="2">★★☆☆☆</option>
+                                <option value="1">★☆☆☆☆</option>
+                            </select>
+                            <input type="text" id="newReviewUser" placeholder="Your Name" required style="flex: 1; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                        </div>
+                        <textarea id="newReviewText" placeholder="Share your thoughts..." required style="width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px; margin-bottom: 0.5rem; resize: none;" rows="2"></textarea>
+                        <button type="submit" style="width: 100%; background: #6366f1; color: white; border: none; padding: 0.5rem; border-radius: 6px; cursor: pointer; font-weight: 500;">Submit Review</button>
+                    </form>
                 </div>
             </div>
-        </div>
-
-        <div class="cart-footer">
-            <div id="cartTotalRow" style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">
-                <span>Total</span>
-                <span id="cartTotal">$0.00</span>
-            </div>
-            
-            <button id="checkoutBtn" onclick="nextStep()" class="add-btn" style="background: #2563eb;">Checkout Now</button>
-            <button id="backBtn" onclick="prevStep()" class="add-btn" style="background: #94a3b8; margin-top: 0.5rem; display: none;">Back</button>
         </div>
     </div>
-
-    <!-- Track Order Modal -->
-    <div class="cart-overlay" id="orderOverlay" onclick="closeOrderTrackModal()"></div>
-    <div id="orderModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 1px solid rgba(255,255,255,0.08); padding: 2rem; border-radius: 16px; width: 600px; max-width: 90%; z-index: 2000; display: none; color: white;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.5rem;">My Orders</h2>
-            <button onclick="closeOrderTrackModal()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
-        </div>
-
-        <div id="emailInputSection">
-            <p style="margin-bottom: 1rem; color: #94a3b8;">Enter your email to view your order history.</p>
-            <div style="display: flex; gap: 1rem;">
-                <input type="email" id="trackEmail" placeholder="john@example.com" style="flex: 1;">
-                <button onclick="fetchMyOrders()" style="background: #6366f1; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; cursor: pointer;">View</button>
-            </div>
-        </div>
-
-        <div id="orderListSection" style="margin-top: 2rem; max-height: 400px; overflow-y: auto;">
-             <!-- Orders Injected Here -->
-        </div>
-    </div>
-
-    <script src="js/storefront.js?v=12"></script>
+    
+    <script src="js/storefront.js?v=13"></script>
 </body>
 </html>

@@ -3,14 +3,17 @@ let allProducts = [];
 
 let activeCategoryFilters = new Set();
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Theme Check
     const isDarkMode = localStorage.getItem('darkMode') !== 'false';
     if (!isDarkMode) {
         document.body.classList.add('light-mode');
     }
 
-    loadProducts();
+    // Initial Load
+    await loadProducts();
+    // After products are loaded, check if we can show trending
+    loadTrending();
 
     // Attach listeners
     document.getElementById('storeSearch').addEventListener('input', applyFilters);
@@ -25,13 +28,33 @@ async function loadProducts() {
         const data = await response.json();
         allProducts = data.content;
 
-        // Dynamically create category checkboxes
         renderCategoryFilters();
-
-        // Initial Render
         renderProducts(allProducts);
     } catch (error) {
         console.error('Error:', error);
+    }
+}
+
+async function loadTrending() {
+    try {
+        const res = await fetch('/api/v1/analytics/trending');
+        const trendingData = await res.json();
+
+        // Filter trendingData to only include items that we actually have in allProducts (to ensure we have image/price etc)
+        // Or if analytics data has enough info, verify. Analytics has productId, productName, etc.
+        // We'll map analytics items to product details from allProducts
+
+        const trendingProducts = trendingData.map(t => {
+            const product = allProducts.find(p => p.id === t.productId);
+            return product; // If not found, it will be undefined, filter it out
+        }).filter(Boolean);
+
+        if (trendingProducts.length > 0) {
+            document.getElementById('trendingSection').style.display = 'block';
+            renderProducts(trendingProducts.slice(0, 4), 'trendingGrid');
+        }
+    } catch (e) {
+        console.error("Error loading trending:", e);
     }
 }
 
@@ -68,18 +91,11 @@ function applyFilters() {
     const showStockOnly = document.getElementById('stockFilter').checked;
 
     const filtered = allProducts.filter(p => {
-        // 1. Search Term (Name or Category)
         const matchesTerm = !term ||
             p.name.toLowerCase().includes(term) ||
             (p.category && p.category.toLowerCase().includes(term));
-
-        // 2. Category Filter
         const matchesCategory = activeCategoryFilters.size === 0 || activeCategoryFilters.has(p.category);
-
-        // 3. Price Range
         const matchesPrice = p.price >= minPrice && p.price <= maxPrice;
-
-        // 4. Stock Availability
         const matchesStock = !showStockOnly || (p.quantity > 0 && p.status !== 'OUT_OF_STOCK');
 
         return matchesTerm && matchesCategory && matchesPrice && matchesStock;
@@ -88,17 +104,17 @@ function applyFilters() {
     renderProducts(filtered);
 }
 
-function renderProducts(products) {
-    const grid = document.getElementById('productsGrid');
+function renderProducts(products, containerId = 'productsGrid') {
+    const grid = document.getElementById(containerId);
+    if (!grid) return;
 
     if (products.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #94a3b8;">No products found matching your search.</div>';
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #94a3b8;">No products found.</div>';
         return;
     }
 
     grid.innerHTML = products.map(product => {
         const isOutOfStock = product.quantity === 0 || product.status === 'OUT_OF_STOCK';
-
         let imageHtml = `<div class="product-image"><img src="https://placehold.co/400x300/1e293b/ffffff?text=No+Image" alt="No Image"></div>`;
         if (product.imageUrl) {
             imageHtml = `<div class="product-image"><img src="${product.imageUrl}" alt="${product.name}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/400x300/1e293b/ffffff?text=Image+Error';"></div>`;
@@ -122,16 +138,145 @@ function renderProducts(products) {
                     ${badgeHtml}
                     <div class="product-price">$${product.price.toFixed(2)}</div>
                     
-                    <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.price}, ${product.quantity}, '${product.imageUrl || ''}')" 
-                            class="add-btn"
-                            ${isOutOfStock ? 'disabled' : ''}>
-                        ${isOutOfStock ? 'Sold Out' : '<i class="fas fa-shopping-bag"></i> Add to Cart'}
-                    </button>
+                    <div style="display: flex; gap: 0.5rem;">
+                         <button onclick="viewDetails(${product.id})" class="add-btn" style="background: rgba(255,255,255,0.1); flex: 1; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.price}, ${product.quantity}, '${product.imageUrl || ''}')" 
+                                class="add-btn"
+                                style="flex: 3;"
+                                ${isOutOfStock ? 'disabled' : ''}>
+                            <i class="fas fa-shopping-bag"></i> Add
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
 }
+
+// --- Product Details & Reviews ---
+let currentReviewProductId = null;
+
+function viewDetails(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    currentReviewProductId = productId;
+
+    // Populate Modal
+    document.getElementById('reviewProductName').innerText = product.name;
+    document.getElementById('reviewProductDesc').innerText = product.description || 'No description available.';
+    document.getElementById('reviewProductPrice').innerText = '$' + product.price.toFixed(2);
+
+    const imgContainer = document.getElementById('reviewProductImage');
+    if (product.imageUrl) {
+        imgContainer.innerHTML = `<img src="${product.imageUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+    } else {
+        imgContainer.innerHTML = `<img src="https://placehold.co/400x300/1e293b/ffffff?text=No+Image" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+    }
+
+    // Show Modal
+    const overlay = document.getElementById('reviewOverlay');
+    const modal = document.getElementById('reviewModal');
+    overlay.style.display = 'block';
+    modal.style.display = 'flex';
+
+    // Log Activity
+    logActivity(productId, 'PRODUCT_VIEW', { page: 'storefront' });
+
+    // Fetch Reviews
+    fetchReviews(productId);
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewOverlay').style.display = 'none';
+    document.getElementById('reviewModal').style.display = 'none';
+}
+
+async function logActivity(productId, action, metadata) {
+    try {
+        await fetch('/api/v1/activity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                productId: productId,
+                userId: 'guest_user', // Simulating guest
+                action: action,
+                metadata: metadata,
+                timestamp: new Date().toISOString()
+            })
+        });
+    } catch (e) {
+        console.error("Log activity failed", e);
+    }
+}
+
+async function fetchReviews(productId) {
+    const list = document.getElementById('reviewsList');
+    list.innerHTML = '<div style="text-align: center; color: #64748b; padding-top: 2rem;">Loading reviews...</div>';
+
+    try {
+        const res = await fetch(`/api/v1/reviews/${productId}`);
+        const reviews = await res.json();
+
+        if (reviews.length === 0) {
+            list.innerHTML = '<div style="text-align: center; color: #94a3b8; padding-top: 1rem;">No reviews yet. Be the first!</div>';
+            return;
+        }
+
+        list.innerHTML = reviews.map(r => `
+            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-weight: 600; color: #e2e8f0;">${r.userId || 'Anonymous'}</span>
+                    <span style="color: #f59e0b;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5;">${r.reviewText || ''}</p>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">${new Date(r.createdAt).toLocaleDateString()}</div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        list.innerHTML = '<div style="text-align: center; color: #ef4444; padding-top: 1rem;">Failed to load reviews.</div>';
+    }
+}
+
+async function submitReview(e) {
+    e.preventDefault();
+    if (!currentReviewProductId) return;
+
+    const rating = parseInt(document.getElementById('newReviewRating').value);
+    const userId = document.getElementById('newReviewUser').value;
+    const text = document.getElementById('newReviewText').value;
+
+    const body = {
+        rating: rating,
+        userId: userId,
+        reviewText: text,
+        tags: [] // Optional
+    };
+
+    try {
+        const res = await fetch(`/api/v1/reviews/${currentReviewProductId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+            // Clear form
+            document.getElementById('addReviewForm').reset();
+            // Refresh Reviews
+            fetchReviews(currentReviewProductId);
+        } else {
+            alert("Failed to submit review");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error submitting review");
+    }
+}
+
 
 function addToCart(id, name, price, maxQty, img) {
     const existing = cart.find(i => i.productId === id);

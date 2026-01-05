@@ -1,7 +1,7 @@
 package com.inventory.service;
 
 import com.inventory.model.Product;
-import com.inventory.repository.ProductRepository;
+import com.inventory.repository.jpa.ProductRepository;
 import com.inventory.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +106,7 @@ public class ProductService {
     }
 
     @Autowired
-    private com.inventory.repository.OrderRepository orderRepository;
+    private com.inventory.repository.jpa.OrderRepository orderRepository;
 
     public List<com.inventory.model.Order> getAllOrders() {
         return orderRepository.findAll();

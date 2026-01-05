@@ -282,48 +282,71 @@ document.querySelectorAll('.nav-item').forEach(item => {
 // --- Analytics Logic ---
 let categoryChart = null;
 let trendChart = null;
+let viewsChart = null;
+let ratingsChart = null;
 
 async function initCharts() {
-    // Prevent re-rendering if already exists
-    if (categoryChart || trendChart) return;
+    // 1. Fetch Real MongoDB Data
+    try {
+        const [trendingRes, ratedRes] = await Promise.all([
+            fetch('/api/v1/analytics/trending'),
+            fetch('/api/v1/analytics/top-rated')
+        ]);
 
-    // Fetch real data or use memoized/current data if available
-    // For now using current 'products' array
+        const trendingData = await trendingRes.json();
+        const ratedData = await ratedRes.json();
 
-    // 1. Category Distribution
+        renderCategoryChart();
+        renderTrendChart();
+        renderViewsChart(trendingData);
+        renderRatingsChart(ratedData);
+
+    } catch (e) {
+        console.error('Error fetching analytics:', e);
+    }
+}
+
+function renderCategoryChart() {
+    if (categoryChart) categoryChart.destroy();
+
     const categoryCounts = {};
     products.forEach(p => {
         const cat = p.category || 'Uncategorized';
         categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
     });
 
-    const ctx1 = document.getElementById('categoryChart').getContext('2d');
-    categoryChart = new Chart(ctx1, {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: Object.keys(categoryCounts),
             datasets: [{
                 data: Object.values(categoryCounts),
-                backgroundColor: ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b'],
+                backgroundColor: ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6'],
                 borderColor: 'transparent'
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'bottom', labels: { color: '#94a3b8' } }
             }
         }
     });
+}
 
-    // 2. Stock Trends (Mock Data for demo as we don't have historical data)
-    const ctx2 = document.getElementById('trendChart').getContext('2d');
-    trendChart = new Chart(ctx2, {
+function renderTrendChart() {
+    if (trendChart) trendChart.destroy();
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    trendChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
                 label: 'Stock Level',
-                data: [65, 59, 80, 81, 56, 55, products.length], // Ending with current count
+                data: [65, 59, 80, 81, 56, 55, products.length],
                 borderColor: '#14b8a6',
                 tension: 0.4,
                 fill: true,
@@ -331,10 +354,73 @@ async function initCharts() {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
                 x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
+    });
+}
+
+function renderViewsChart(data) {
+    if (viewsChart) viewsChart.destroy();
+    
+    // Top 5 viewed
+    const top5 = data.slice(0, 5);
+
+    const ctx = document.getElementById('viewsChart').getContext('2d');
+    viewsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: top5.map(d => d.productName.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Total Views',
+                data: top5.map(d => d.totalViewCount),
+                backgroundColor: '#3b82f6',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
+    });
+}
+
+function renderRatingsChart(data) {
+    if (ratingsChart) ratingsChart.destroy();
+    
+    // Top 5 rated
+    const top5 = data.slice(0, 5);
+
+    const ctx = document.getElementById('ratingsChart').getContext('2d');
+    ratingsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: top5.map(d => d.productName.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Rating (0-5)',
+                data: top5.map(d => d.averageRating),
+                backgroundColor: '#f59e0b',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { max: 5, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
             }
         }
     });

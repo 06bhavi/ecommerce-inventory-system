@@ -1,4 +1,4 @@
-package com.inventory.repository;
+package com.inventory.repository.jpa;
 
 import com.inventory.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
