@@ -1,5 +1,9 @@
 // Main App Logic
-const API_URL = '/api/v1/products';
+// Main App Logic
+// IMPORTANT: Replace this URL with your actual Railway Backend URL (e.g., https://nexusinv-production.up.railway.app)
+// Do NOT include the trailing slash at the end.
+const API_BASE_URL = 'https://nexusinv-production-c61e.up.railway.app';
+const API_URL = `${API_BASE_URL}/api/v1/products`;
 const PLACEHOLDER_IMG = 'https://placehold.co/400x300/1e293b/ffffff?text=No+Image';
 let products = [];
 let isEditMode = false;
@@ -226,7 +230,7 @@ async function loadOrders() {
     tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
 
     try {
-        const response = await fetch('/api/v1/products/orders');
+        const response = await fetch(`${API_BASE_URL}/api/v1/products/orders`);
         const data = await response.json();
         const orders = data.data;
 
@@ -289,8 +293,8 @@ async function initCharts() {
     // 1. Fetch Real MongoDB Data
     try {
         const [trendingRes, ratedRes] = await Promise.all([
-            fetch('/api/v1/analytics/trending'),
-            fetch('/api/v1/analytics/top-rated')
+            fetch(`${API_BASE_URL}/api/v1/analytics/trending`),
+            fetch(`${API_BASE_URL}/api/v1/analytics/top-rated`)
         ]);
 
         const trendingData = await trendingRes.json();
@@ -367,7 +371,7 @@ function renderTrendChart() {
 
 function renderViewsChart(data) {
     if (viewsChart) viewsChart.destroy();
-    
+
     // Top 5 viewed
     const top5 = data.slice(0, 5);
 
@@ -397,7 +401,7 @@ function renderViewsChart(data) {
 
 function renderRatingsChart(data) {
     if (ratingsChart) ratingsChart.destroy();
-    
+
     // Top 5 rated
     const top5 = data.slice(0, 5);
 
