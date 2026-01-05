@@ -14,7 +14,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - inventory-network
     healthcheck:
@@ -45,7 +45,7 @@ services:
   # Java Application Service
   app:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: inventory-app
     depends_on:

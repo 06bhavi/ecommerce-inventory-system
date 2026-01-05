@@ -1,0 +1,12 @@
+{
+  "name": "inventory-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for E-Commerce Inventory System",
+  "scripts": {
+    "build": "echo 'No build step required for static site'",
+    "start": "serve -s ."
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}

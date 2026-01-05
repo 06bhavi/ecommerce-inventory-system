@@ -110,21 +110,35 @@ CREATE TABLE products (
 
 ```
 ecommerce-inventory-system/
-├── src/main/java/com/inventory/
-│   ├── controller/          # REST endpoints
-│   ├── service/             # Business logic
-│   ├── model/               # JPA entities
-│   ├── repository/          # Database access
-│   └── exception/           # Error handling
-├── docker/                  # Docker scripts
-├── jenkins/                 # Jenkins config
-├── linux-scripts/           # Helper scripts
-├── Dockerfile               # Container image
+├── backend/                 # Backend Application (Java/Spring Boot)
+│   ├── src/                 # Source code
+│   ├── Dockerfile           # Backend container config
+│   ├── pom.xml              # Maven dependencies
+│   └── ...
+├── frontend/                # Frontend Application (Static/Node)
+│   ├── index.html           # Entry point
+│   ├── css/                 # Stylesheets
+│   ├── js/                  # JavaScript logic
+│   └── package.json         # Frontend config
 ├── docker-compose.yml       # Services orchestration
-├── Jenkinsfile              # CI/CD pipeline
-├── pom.xml                  # Maven dependencies
-├── init.sql                 # Database initialization
 └── README.md
+```
+
+## Deployment
+
+You can now deploy the frontend and backend independently.
+
+### 1. Frontend Deployment (e.g., Render, Vercel, Netlify)
+- **Root Directory**: `frontend`
+- **Build Command**: `npm run build` (or leave empty for static sites)
+- **Publish Directory**: `.` (or `dist` if you add a build step later)
+- **Environment**: Node.js or Static Site
+
+### 2. Backend Deployment (e.g., Render, Railway, AWS)
+- **Root Directory**: `backend`
+- **Build Command**: Docker (Automatic) or `mvn clean package`
+- **Environment**: Docker or Java
+- **Docker Path**: `./Dockerfile` (relative to backend root)
 ```
 
 ## Jenkins CI/CD
