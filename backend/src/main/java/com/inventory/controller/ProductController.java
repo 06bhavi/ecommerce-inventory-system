@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/products")
-@CrossOrigin("*")
+// @CrossOrigin("*") removed to use global CORS config
 public class ProductController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);

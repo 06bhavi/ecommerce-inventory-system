@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css?v=14">
+    <link rel="stylesheet" href="css/grid.css?v=14">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebarガラス">
+            <div class="brand">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <h2>Nexus<span class="highlight">Inv</span></h2>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-target="dashboard-section"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+                <a href="#" class="nav-item" data-target="products-section"><i class="fa-solid fa-box-open"></i> Products</a>
+                <a href="#" class="nav-item" data-target="orders-section"><i class="fa-solid fa-receipt"></i> Orders</a>
+                <a href="#" class="nav-item" data-target="analytics-section"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+                <a href="#" class="nav-item" data-target="settings-section"><i class="fa-solid fa-gear"></i> Settings</a>
+
+            </nav>
+
+            <div class="user-profile">
+                <!-- Added Link -->
+                <a href="storefront.html" style="margin-right: auto; color: var(--primary); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); text-decoration: none;" title="Go to Storefront">
+                    <i class="fa-solid fa-shop"></i>
+                </a>
+                <!-- Added Link -->
+
+                
+                <div class="avatar">AD</div>
+                <div class="info">
+                    <p class="name">Admin User</p>
+                    <p class="role">Manager</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="page-section active">
+                <header class="top-bar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search inventory...">
+                    </div>
+                    <button class="btn-primary" onclick="openModal()">
+                        <i class="fa-solid fa-plus"></i> Add Product +
+                    </button>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon color-1"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Items</h3>
+                            <p id="totalProducts">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon color-2"><i class="fa-solid fa-dollar-sign"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Value</h3>
+                            <p id="totalValue">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon color-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h3>Low Stock</h3>
+                            <p id="lowStock">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Inventory Items</h2>
+                        <div class="view-options">
+                            <button class="icon-btn active" data-view="list"><i class="fa-solid fa-list"></i></button>
+                            <button class="icon-btn" data-view="grid"><i class="fa-solid fa-border-all"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div id="dashboard-list-view" class="table-container glass-panel">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody">
+                                <!-- Items will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="dashboard-grid-view" class="inventory-grid" style="display: none;">
+                        <!-- Grid items injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="productSearchInput" placeholder="Search products...">
+                    </div>
+                    <button class="btn-primary" onclick="openModal()">
+                        <i class="fa-solid fa-plus"></i> Add Product
+                    </button>
+                </header>
+
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>All Products</h2>
+                        <div class="view-options">
+                            <button class="icon-btn active" data-view="list"><i class="fa-solid fa-list"></i></button>
+                            <button class="icon-btn" data-view="grid"><i class="fa-solid fa-border-all"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div id="products-list-view" class="table-container glass-panel">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allProductsTableBody">
+                                <!-- Items will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="products-grid-view" class="inventory-grid" style="display: none;">
+                        <!-- Grid items injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <h2>Orders Management</h2>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Search orders...">
+                    </div>
+                </header>
+
+                <div class="content-section">
+                    <div class="table-container glass-panel">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Payment</th>
+                                    <th>Address</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <!-- Orders injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <h2>Analytics Dashboard</h2>
+                </header>
+                <div class="analytics-grid">
+                    <div class="glass-panel chart-container">
+                        <h3>Inventory Distribution</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="glass-panel chart-container">
+                        <h3>Stock Trends</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                    <div class="glass-panel chart-container">
+                        <h3>Most Viewed Products</h3>
+                        <canvas id="viewsChart"></canvas>
+                    </div>
+                    <div class="glass-panel chart-container">
+                        <h3>Top Rated Products</h3>
+                        <canvas id="ratingsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="page-section" style="display: none;">
+                <header class="top-bar">
+                    <h2>System Settings</h2>
+                </header>
+                <div class="settings-container glass-panel">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Dark Mode</h4>
+                            <p>Enable immersive dark theme</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Notifications</h4>
+                            <p>Email alerts for low stock</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notificationsToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Currency</h4>
+                            <p>Default currency for valuation</p>
+                        </div>
+                        <select class="glass-select">
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                            <option>INR (₹)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Product</h3>
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="productForm">
+                <input type="hidden" name="id" id="productId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" name="name" id="productName" required placeholder="e.g. Neural Link V2">
+                    </div>
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input type="text" name="sku" id="productSku" required placeholder="Generate SKU...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Image URL</label>
+                        <input type="url" name="imageUrl" id="productImageUrl" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea name="description" id="productDescription" required placeholder="Product details..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" name="price" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" id="productQuantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" name="category" id="productCategory" list="categories" placeholder="Select or type...">
+                        <datalist id="categories">
+                            <option value="Electronics">
+                            <option value="Accessories">
+                            <option value="Components">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="modalSubmitBtn">Create Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js?v=14"></script>
+</body>
+</html>
