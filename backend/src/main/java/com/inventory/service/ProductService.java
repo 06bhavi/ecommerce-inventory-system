@@ -23,6 +23,13 @@ public class ProductService {
     // Create
     public Product createProduct(Product product) {
         logger.info("Creating product: {}", product.getName());
+
+        if (product.getQuantity() <= 0) {
+            product.setStatus("OUT_OF_STOCK");
+        } else {
+            product.setStatus("IN_STOCK");
+        }
+
         return productRepository.save(product);
     }
 
