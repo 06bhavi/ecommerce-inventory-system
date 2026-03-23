@@ -1,0 +1,4 @@
+[build]
+  # Set the publish directory to frontend, where index.html lives
+  publish = "frontend"
+
